@@ -48,7 +48,7 @@ struct Config{
     float min_speed = -0.5;
     float max_yawrate = 40.0 * PI / 180.0;
     float max_accel = 0.2;
-    float robot_radius = 0.5;//1 bylide 实际中注意这个机器人的半径 太大导致原地打转
+    float robot_radius = 0.6;//1 bylide 实际中注意这个机器人的半径 太大导致原地打转
     float max_dyawrate = 40.0 * PI / 180.0;
 
     float v_reso = 0.01;

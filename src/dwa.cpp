@@ -22,10 +22,11 @@ bool Dwa::stepOnceToGoal(std::vector<State>* best_trajectry, State* cur_state,Ob
 	static int ccn=0;
     Window dw = calc_dynamic_window(cur_x_, config_);
 	 
-	if(ccn ++ >= 50)
+	if(ccn ++ >= 30)
 	{
-	 Point ob{1.0,5.0};
-	 obs_.push_back(ob);
+	 ccn = -9999;
+	// Point ob{cur_x_.x_,cur_x_.y_+ 1};//1m处避章
+	 // obs_.push_back(ob);
 	}
     Traj ltraj = calc_final_input(cur_x_, calculated_u, dw, config_, goal_, obs_);
     printf("control (v,w) (%.1f,%.1f)\n ",calculated_u.v_,calculated_u.w_);
@@ -150,7 +151,7 @@ Traj Dwa::calc_final_input(
 			// by lide 增加比重
 		    // 航向得分的比重、速度得分的比重、障碍物距离得分的比重 
             //evalParam = [];
-            float final_cost = to_goal_cost + speed_cost + ob_cost;
+            float final_cost = 1.5*to_goal_cost + 2.5*speed_cost + ob_cost;
 
             if (min_cost >= final_cost){
                 min_cost = final_cost;
