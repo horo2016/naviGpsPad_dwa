@@ -17,7 +17,7 @@ void gpio_init()//echo--27    trig--28  pwm--27
 	pinMode (28, OUTPUT) ; //trig
 	//pinMode (27, OUTPUT) ; //pwm sg09
 
-
+/*
 	pinMode (22, OUTPUT); //in1-in4 L298N
 	pinMode (23, OUTPUT) ;
 
@@ -38,7 +38,7 @@ void gpio_init()//echo--27    trig--28  pwm--27
 	digitalWrite(24, 0) ; //
 	digitalWrite(25,0);
 	digitalWrite (22, 0) ;
-	
+	*/
 }
 //60 full;30-50%
 void set_duty_speed(int duty)

@@ -670,7 +670,7 @@ int HeadingAnalysis(int Heading,int Bearing)
 	 DEBUG(LOG_DEBUG,"targetPosition: %d ,meters:%d \n",targetPosition,meters);
   do{
   	 
-	 done = dwa_loop();
+	 done = dwa_loop(meters);
 
      usleep(10000);
      }

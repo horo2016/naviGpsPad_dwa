@@ -166,6 +166,42 @@ void cmd_send(const char cmd_v,int speed)
 	//ser.write(s_buffer,sBUFFERSIZE);
 	write(imu_fd, s_buffer,sBUFFERSIZE);  
 }
+//w > 0 左转 w <0 右转
+void cmd_send2(float vspeed,float aspeed)
+{
+	unsigned char i;
+	char cmd_vel[16];
+	
+//前后 左右 停止 ，带角速度和线速度同时存在
+	
+     
+	Ang_v.fvalue = aspeed;
+	Vx.fvalue = vspeed; 
+	Vy.fvalue = 0;
+  
+	memset(s_buffer,0,sizeof(s_buffer));
+	//数据打包
+	s_buffer[0] = 0xff;
+	s_buffer[1] = 0xff;
+	s_buffer[2] = 15;
+	//Vx
+	memcpy(s_buffer+3,Vx.cvalue,4);
+	memcpy(s_buffer+7,Vy.cvalue,4);
+	memcpy(s_buffer+11,Ang_v.cvalue,4);
+	
+	//CRC
+	s_buffer[15] = s_buffer[3]^s_buffer[4]^s_buffer[5]^s_buffer[6] \
+	^s_buffer[7]^s_buffer[8]^s_buffer[9]^s_buffer[10]^s_buffer[11] \
+	^s_buffer[12]^s_buffer[13]^s_buffer[14];
+	
+	//for(i=0;i<16;i++){
+	//	printf("0x%02x ",s_buffer[i]);
+	//}
+	
+	//ser.write(s_buffer,sBUFFERSIZE);
+	write(imu_fd, s_buffer,sBUFFERSIZE);  
+}
+
 //接收数据分析与校验
 unsigned char data_analysis(unsigned char *buffer)
 {

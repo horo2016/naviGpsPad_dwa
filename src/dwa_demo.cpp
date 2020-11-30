@@ -8,7 +8,7 @@
 #include<opencv2/highgui/highgui.hpp>
 #include "utility.h"
 #include "dwa.h"
-
+#include "stm32_control.h"
 cv::Point2i cv_offset(    float x, float y, int image_width=200, int image_height=200)
 {
     cv::Point2i output;
@@ -18,14 +18,18 @@ cv::Point2i cv_offset(    float x, float y, int image_width=200, int image_heigh
 };
 
 //如果目标里障碍物太近 极容易导致原地画圈
-int dwa_loop(){
+int dwa_loop(float meters){
     State start{0.0, 0.0, 1, 0.0, 0.0};
-    Point goal{1.0,9.0};
+	Point goal{0.0,meters};
+	if(meters <= 10.0){
+   		 goal.x_ = 0.0; 
+		 goal.y_ = meters;
+		}
     Obstacle ob{
                         
                         {5.0, 4.0},
                         {5.0, 5.0},
-                        {2.0, 5.0},
+                        //{2.0, 5.0},
                        // {1.0, 5.0},
                         {-5.0, 4.0},
                         {-5.0, 6.0},
@@ -43,7 +47,12 @@ int dwa_loop(){
     int count = 0;
 
     Dwa dwa_demo(start, goal, ob, config);
- 	cv::VideoWriter writer;
+    static int ccn=0;
+    cv::Mat final_canvas;
+    Traj ltraj;
+    State x;
+	Obstacle dyn_ob;
+		cv::VideoWriter writer;
 	writer.open("out_dwa.avi",CV_FOURCC('M', 'J', 'P', 'G'),
         30, //不进行跟踪，定位，只显示、录制时的帧率
         cv::Size(500,500),
@@ -52,13 +61,15 @@ int dwa_loop(){
     {
         return 0;
     }
-    cv::Mat final_canvas;
-    Traj ltraj;
-    State x;
-	Obstacle dyn_ob;
     while(!dwa_demo.stepOnceToGoal(&ltraj, &x,&dyn_ob)){
         traj.push_back(x);
-
+	printf("control (v,w) (%.1f,%.1f)\n ",dwa_demo.calculated_u.v_,dwa_demo.calculated_u.w_);
+    cmd_send2(dwa_demo.calculated_u.v_, dwa_demo.calculated_u.w_);
+	if(ccn ++ >= 50)
+	{
+	 Point obs{1.0,5.0};
+	 dwa_demo.obs_.push_back(obs);
+	}
         // visualization
         cv::Mat bg(500,500, CV_8UC3, cv::Scalar(255,255,255));
         cv::circle(bg, cv_offset(goal.x_, goal.y_, bg.cols, bg.rows),
