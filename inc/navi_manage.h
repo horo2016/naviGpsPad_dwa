@@ -36,6 +36,8 @@ extern double waypointRange ;
 extern unsigned long millis();
 extern   void RotateDegrees(int degrees);
 extern   void MoveDistance(int meters);
+extern void MoveDistanceDwa(int meters);
+
 extern  void *navimanage_handle (void *arg);
 
 #ifdef __cplusplus

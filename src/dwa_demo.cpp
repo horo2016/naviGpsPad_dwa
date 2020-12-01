@@ -13,8 +13,8 @@
 cv::Point2i cv_offset(    float x, float y, int image_width=200, int image_height=200)
 {
     cv::Point2i output;
-    output.x = int(x * 10) + image_width/2;
-    output.y = image_height - int(y * 10) - image_height/3;
+    output.x = int(x * 10) ;
+    output.y = image_height - int(y * 10) ;
     return output;
 };
 

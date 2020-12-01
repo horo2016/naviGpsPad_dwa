@@ -957,7 +957,7 @@ void *navimanage_handle (void *arg)
 	            }
 				if ( millis() - lastDISMillis > DIS_BLINK_INTERVAL)
 	        	{
-	        	 		if(GLOBAL_STATUS == MOVE_STATUS)
+	        	 		/*if(GLOBAL_STATUS == MOVE_STATUS)
 	        	 		{
 							if (DetectObstacles() == true)
 								GLOBAL_STATUS == AVOIDOBJ_STATUS;
@@ -966,14 +966,14 @@ void *navimanage_handle (void *arg)
 								if (DetectObstacles() == false)
 								GLOBAL_STATUS == MOVE_STATUS;
 
-							}
-						
+							}*/
+							
 	            		lastDISMillis = millis(); //lastDISMillis
 	            }
 	     	}//end while switch on
      	if(GLOBAL_STATUS == MANUAL_STATUS )
 		{
-			SteerToHeading();
+			//SteerToHeading();
 		}
      
           	// Shut down if the battery level drops below 10.8V
