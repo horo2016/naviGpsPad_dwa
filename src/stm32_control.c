@@ -255,7 +255,7 @@ int *stm_Loop()
 		printf("%s open ok \n",dev);
 	}
 	else {
-		   printf("%s open failed \n",dev);
+		   DEBUG(LOG_ERR,"%s open failed \n",dev);
 	}
     Vx.fvalue = 0; 
 	Vy.fvalue = 0; 
