@@ -44,7 +44,7 @@ struct Point {
 using Obstacle = std::vector<Point>;;
 
 struct Config{
-    float max_speed = 1.0;
+    float max_speed = 0.5;
     float min_speed = -0.5;
     float max_yawrate = 40.0 * PI / 180.0;
     float max_accel = 0.2;
@@ -54,7 +54,7 @@ struct Config{
     float v_reso = 0.01;
     float yawrate_reso = 0.01 * PI / 180.0;
 
-    float dt = 0.1;
+    float dt = 0.322;
     float predict_time = 3.0;
     float to_goal_cost_gain = 0.5;//1.0 权重调节 认为航向角的比重为0.5
     float speed_cost_gain = 1.0;

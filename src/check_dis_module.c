@@ -3,12 +3,25 @@
 #include"wiringPi.h"
 #include"osp_syslog.h"
 
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+#include <sys/select.h>
+#include <fcntl.h>   //low_level i/o
+#include <unistd.h>
+#include <errno.h>
+#include <malloc.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/mman.h>
+#include <sys/ioctl.h>
 
 #define pwmpin 1
 #define mode PWM_MODE_MS
 
-int global_dis = -1;
+float  global_dis = -1;
 
 void gpio_init()//echo--27    trig--28  pwm--27
 {
@@ -21,14 +34,14 @@ void gpio_init()//echo--27    trig--28  pwm--27
 	pinMode (22, OUTPUT); //in1-in4 L298N
 	pinMode (23, OUTPUT) ;
 
-	pinMode (25, OUTPUT) ; //火焰传感器
-	pinMode (24, OUTPUT) ; //火焰
+	pinMode (25, OUTPUT) ; //禄冒脩忙麓芦赂脨脝梅
+	pinMode (24, OUTPUT) ; //禄冒脩忙
 
 	pinMode(pwmpin,PWM_OUTPUT);
     	pwmSetMode(mode);
 
 //	pwmSetRange(600);//600/60 =10khz
-	//启动物理开关
+	//脝么露炉脦茂脌铆驴陋鹿脴
     pullUpDnControl(28,PUD_DOWN);
 	
 	//pullUpDnControl(27,PUD_DOWN);
@@ -46,14 +59,14 @@ void set_duty_speed(int duty)
 	pwmWrite(pwmpin,duty);
 
 }
-//让多级旋转的角度
+//脠脙露脿录露脨媒脳陋碌脛陆脟露脠
 //angel  0 45 90 180
 int turn_angel(int angl)
 {
 	int angle=angl;
 	int i=0;
 	float x=0;
-	int k=180;//180次循环的时间够了
+	int k=180;//180麓脦脩颅禄路碌脛脢卤录盲鹿禄脕脣
 	while(k--)
 	{
 		x=11.11*i;
@@ -71,7 +84,7 @@ int turn_angel_0()
 	int angle;
 	int i=0;
 	float x=0;
-	int k=50;//50次循环的时间够了
+	int k=50;//50麓脦脩颅禄路碌脛脢卤录盲鹿禄脕脣
   while(k--)
 	{
 	
@@ -89,7 +102,7 @@ int turn_angel_R90()
 	int angle;
 	int i=0;
 	float x=0;
-	int k=50;//180次循环的时间够了
+	int k=50;//180麓脦脩颅禄路碌脛脢卤录盲鹿禄脕脣
   while(k--)
 	{
 	
@@ -107,7 +120,7 @@ int turn_angel_L90()
 	int angle;
 	int i=0;
 	float x=0;
-	int k=50;//180次循环的时间够了
+	int k=50;//180麓脦脩颅禄路碌脛脢卤录盲鹿禄脕脣
   while(k--)
 	{
 	
@@ -126,7 +139,7 @@ int turn_angel_L45()
 	int angle;
 	int i=0;
 	float x=0;
-	int k=50;//180次循环的时间够了
+	int k=50;//180麓脦脩颅禄路碌脛脢卤录盲鹿禄脕脣
   while(k--)
 	{
 	
@@ -140,7 +153,7 @@ int turn_angel_L45()
 }
 
 
-int disMeasure(void)
+float disMeasure(void)
 {
 	struct timeval tv1;
 	struct timeval tv2;
@@ -150,24 +163,24 @@ int disMeasure(void)
 	delayMicroseconds(2);
 	digitalWrite(28, HIGH);//trig
 	delayMicroseconds(10);
-	//发出超声波脉冲
+	//路垄鲁枚鲁卢脡霉虏篓脗枚鲁氓
 	digitalWrite(28, LOW);
 	while(!(digitalRead(27) == 1));
 	gettimeofday(&tv1, NULL);
-	//获取当前时间
+	//禄帽脠隆碌卤脟掳脢卤录盲
 	while(!(digitalRead(27) == 0));
 	gettimeofday(&tv2, NULL);
-	//获取当前时间
+	//禄帽脠隆碌卤脟掳脢卤录盲
 	start = tv1.tv_sec * 1000000 + tv1.tv_usec;
-	DEBUG(LOG_DEBUG, "start:%d \n",start);
-	//微秒级的时间
+//	DEBUG(LOG_DEBUG, "start:%d \n",start);
+	//寰绾х殑鏃堕棿
 	stop = tv2.tv_sec * 1000000 + tv2.tv_usec;
-	DEBUG(LOG_DEBUG, "stop:%d \n",stop);
-	DEBUG(LOG_DEBUG, "stop-start:%d \n",(stop-start));//34cm/ms
+//	DEBUG(LOG_DEBUG, "stop:%d \n",stop);
+//	DEBUG(LOG_DEBUG, "stop-start:%d \n",(stop-start));//34cm/ms
 	DEBUG(LOG_DEBUG, "distance:%d \n",(stop - start)  * 34 / 2000);
-	dis = (stop - start)  * 34 / 2000;//单位cm
-	//求出距离
-	return dis;
+	dis = (stop - start)  * 34 / 2000;//碌楼脦禄cm
+	//脟贸鲁枚戮脿脌毛
+	return  (float)dis;
 
  }
 int read_fire()
@@ -266,7 +279,7 @@ void *getUltrasonicThread(void *arg)
   while(1)
   	{
 		global_dis = disMeasure();
-		usleep(500000);
+		usleep(100000);
   }
 
 }

@@ -23,6 +23,7 @@
 #include "stm32_control.h"
 #include <asm/types.h>  //for videodev2.h
 #include <linux/videodev2.h>
+#include <pthread.h>
 
 //call  socket 
 #include "socket_tcp.h"
@@ -37,8 +38,8 @@ CVFEED cv_res;
 unsigned char s_buffer[sBUFFERSIZE];//发送缓存
 unsigned char r_buffer[rBUFFERSIZE];//接收缓存
 
-unsigned int velspeed =0;
-unsigned int angspeed =0;
+float velspeed =0.0;
+float angspeed =0.0;
 unsigned int positionx =0;
 
 /************************************
@@ -61,6 +62,18 @@ float_union Vx,Vy,Ang_v;
 
 int imu_fd;
 
+pthread_mutex_t cmd_mutex;
+
+ 
+
+ 
+
+int send2fd(unsigned char *dat,int len)
+{
+	pthread_mutex_lock(&cmd_mutex); /*获取互斥锁*/
+	write(imu_fd, dat,sBUFFERSIZE);  
+	pthread_mutex_unlock(&cmd_mutex); /*释放互斥锁*/
+}
 /**********************************************************
  * 数据打包，将获取的cmd_vel信息打包并通过串口发送
  * ********************************************************/
@@ -199,7 +212,7 @@ void cmd_send2(float vspeed,float aspeed)
 	//}
 	
 	//ser.write(s_buffer,sBUFFERSIZE);
-	write(imu_fd, s_buffer,sBUFFERSIZE);  
+	send2fd(s_buffer,sBUFFERSIZE);
 }
 
 //接收数据分析与校验
@@ -255,8 +268,13 @@ int *stm_Loop()
 		printf("%s open ok \n",dev);
 	}
 	else {
-		   DEBUG(LOG_ERR,"%s open failed \n",dev);
+		   printf("%s open failed \n",dev);
 	}
+	int  ret = pthread_mutex_init(&cmd_mutex, NULL);
+     if(ret != 0) {
+         perror("mutex init failure");
+         return 1;
+     }
     Vx.fvalue = 0; 
 	Vy.fvalue = 0; 
 	Ang_v.fvalue = 0; 
@@ -286,14 +304,14 @@ int *stm_Loop()
 				 printf("car inform px.cvalue:%.3f \n",posx.fvalue);
 				 printf("car inform py.cvalue:%.3f \n",posy.fvalue);
 
-				 velspeed = (vx.fvalue*100);
-				 angspeed = (va.fvalue*100);
+				 velspeed = (vx.fvalue);
+				 angspeed = (va.fvalue);
 				 positionx = posx.fvalue *10;
 			   }
 			
 		    // printf("imu serial read byte length:%d\n",i_nread);//32 bytes
 			 memset(r_buffer,0,rBUFFERSIZE);
-			 usleep(800000);
+			 usleep(200000);
 			 }     
 	}
 	close(imu_fd);

@@ -15,6 +15,7 @@ public:
     Obstacle obs_;
     Config config_;
 	Control calculated_u;
+	Control feed_u;
     State cur_x_;
 private:
     State motion(State x, Control u, float dt);

@@ -18,20 +18,15 @@ cur_x_(start), goal_(goal), obs_(obs), config_(config)
 
 bool Dwa::stepOnceToGoal(std::vector<State>* best_trajectry, State* cur_state,Obstacle *cur_obs) 
 {
-    Control calculated_u;
-	static int ccn=0;
+     
+	
     Window dw = calc_dynamic_window(cur_x_, config_);
 	 
-	if(ccn ++ >= 30)
-	{
-	 ccn = -9999;
-	// Point ob{cur_x_.x_,cur_x_.y_+ 1};//1m处避章
-	 // obs_.push_back(ob);
-	}
+
     Traj ltraj = calc_final_input(cur_x_, calculated_u, dw, config_, goal_, obs_);
     printf("control (v,w) (%.1f,%.1f)\n ",calculated_u.v_,calculated_u.w_);
 	//w >0 左转 <0 右转
-    cur_x_ = motion(cur_x_, calculated_u, config_.dt);
+    cur_x_ = motion(cur_x_, feed_u, config_.dt);
 
     //
     *best_trajectry = ltraj;

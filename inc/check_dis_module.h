@@ -11,7 +11,7 @@ extern void car_forward();
 extern void turn_left();
 extern void turn_right();
 
-extern int global_dis;
+extern float  global_dis;
 
 
 

@@ -120,39 +120,7 @@ typedef struct AppTaskAttr_tag
 } app_task_attr;
 
 /*msg type stuct*/
-typedef struct AppMsgType_tag
-{
-	long32 type;
-	void *msg_buf;
-	s32 msg_size;
-} app_msg_type;
 
-typedef struct LOOP_MSG{
-	void *data ;
-	void *handle ;
-	void *reserve ;
-	int  file_num ; 
-	char file_name[256] ;
-	char mac[256] ; 
-	char path[256] ; 
-}loop_msg;
-
-typedef struct timer_callback_tag{
-	void (*callback)(void *data,int len) ;
-	void *param ;
-	int param_len ;
-}timer_callback ;
-
-//added by wangbo 20160412
-typedef struct proto_timer_tag
-{
-	u16 pack_num ;
-	u8 time ;
-}proto_timer ;
-
-proto_timer cammer_pack_timer[TIMER_NUM] ;
-proto_timer system_pack_timer[TIMER_NUM] ;
-proto_timer ota_pack_timer[TIMER_NUM] ;
 
 
 /*Mod Id definition, Do not change this content please!*/
@@ -184,19 +152,8 @@ extern s32 sockfd_camera;
 extern s32 sockfd_gcs;
 extern u32 gcs_main_ip;					// = 0xC0A80010;
 extern int ota_busy_flag;
-int rtp_status ;
 
-extern s32 app_task_spawn (void);
-extern s32 init_timer (void);
-extern s32 send_Msg (s32 src_mod_id, s32 dst_mod_id, void *msg_addr, s32 msg_size);
-extern s32 create_timer (s32 mod_id, u32 timeout, void *msg_addr, s32 msg_size,timer_callback *callback, s32 * timer_id);
-extern s32 osp_create_timer (u32 modid, u32 timeout, void *msg_addr, u32 msg_size,timer_callback *callback, u32 * timer_id) ;
-extern s32 del_timer (s32 timer_id);
-extern void timer_sem_del ();
-extern void *task_signal_handle (void *arg);
-extern s32 get_msg_id (s32 mod_id);
-extern s32 get_msg_type (s32 mod_id) ;
-extern void osp_free (void *data) ;
+
 extern s32 OspIsTimerExist (s32 timer_id);
 extern void second_timer() ;
 extern void multi_client_manager() ;

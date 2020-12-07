@@ -37,70 +37,7 @@ log_type_level log_type[LOG_ID_MAX + 1] = {
 u8 log_buffer[LOG_BUFFER_LEN];
 FILE *file_handle = NULL ;
 
-/********************************* Implements **********************************/
-/*******************************************************************************
-* function name	: task_log_init
-* description	: task log init function
-* param[in] 	: none
-* param[out] 	: none
-* return 		: 0:success;1:failed
-*******************************************************************************/
-s32 task_log_init (void *var)
-{
-	DEBUG(LOG_TRACE,"task_log_init OK!\n");
-	return 0;
-}
 
-/*******************************************************************************
-* function name	: task_log_handle
-* description	: task log handle
-* param[in] 	: message and message length
-* param[out] 	: none
-* return 		: 0:success;1:failed
-*******************************************************************************/
-s32 task_log_handle (void *msg_addr, s32 msg_size)
-{
-	FILE *fp = NULL;
-	app_msg_log *msg_log = (app_msg_log *) msg_addr;
-
-	if(msg_log == NULL)
-		return -1 ;
-
-	switch (msg_log->type){
-		case SYSLOG_LOCAL_BUFFER:
-			printf ("%s", msg_log->trace_str);
-
-			break;
-
-		case SYSLOG_LOCAL_FILE:
-			//fp = fopen ("/home/root/ce.log", "a");
-			fp = fopen ("/home/root/ce.log", "w");
-			if (fp != NULL){
-				fwrite (msg_log->trace_str,strlen ((char *)(msg_log->trace_str)), 1, fp);
-				fseek (fp, 0, SEEK_END);
-
-				if (ftell (fp) > 100000){
-					fclose (fp);
-					remove ("/home/root/ce1.log");
-					rename ("/home/root/ce.log", "/home/root/ce1.log");
-					return 0;
-				}
-
-				fclose (fp);
-			}
-
-			break;
-
-		default:
-			break;
-	}
-
-	if (msg_log->trace_str != NULL){
-		osp_free (msg_log->trace_str);
-	}
-
-	return 0;
-}
 
 /*******************************************************************************
 * function name	: check_syslog_level

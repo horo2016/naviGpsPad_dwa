@@ -173,8 +173,9 @@ void User_MsgCtl(MQTT_USER_MSG  *msg)
 	} 
 	    else  if( get_value_from_cmdline((char *)msg->msg,AVOIDANCE,tmp_value )==0)
 	{
-	        GLOBAL_STATUS = MANUAL_STATUS;
-			MoveDistanceDwa(atoi(tmp_value));
+	       // GLOBAL_STATUS = MANUAL_STATUS;
+		//	MoveDistanceDwa(atoi(tmp_value));
+                system("sudo ./dwa_control ");
 	}else  if( get_value_from_cmdline((char *)msg->msg,"start",tmp_value )==0)
 	{
            GLOBAL_STATUS = STANDBY_STATUS;

@@ -3,12 +3,15 @@
 #include<vector>
 #include<array>
 #include<cmath>
+#include <unistd.h>
 #include<opencv2/opencv.hpp>
 #include<opencv2/core/core.hpp>
 #include<opencv2/highgui/highgui.hpp>
 #include "utility.h"
 #include "dwa.h"
+#include "dwa_demo.h"
 #include "stm32_control.h"
+#include "check_dis_module.h"
 //20m*20m
 cv::Point2i cv_offset(    float x, float y, int image_width=200, int image_height=200)
 {
@@ -64,13 +67,23 @@ int dwa_loop(float meters){
     }
     while(!dwa_demo.stepOnceToGoal(&ltraj, &x,&dyn_ob)){
         traj.push_back(x);
-	printf("control (v,w) (%.1f,%.1f)\n ",dwa_demo.calculated_u.v_,dwa_demo.calculated_u.w_);
-    cmd_send2(dwa_demo.calculated_u.v_, dwa_demo.calculated_u.w_);
-	if(ccn ++ >= 50)
-	{
-	 // Point ob{cur_x_.x_,cur_x_.y_+ 1};//1m处避章
-	 // obs_.push_back(ob);
-	}
+		dwa_demo.feed_u.v_ =  velspeed;
+		dwa_demo.feed_u.w_ =  angspeed;
+
+	 if((ccn == 0)&&(global_dis <= 100))
+        {
+         ccn = 0;
+	printf("global_dis is %.1f \n",global_dis/100);
+ 	printf("dwa_demo.cur_%.1f %.1f \n", dwa_demo.cur_x_.x_,dwa_demo.cur_x_.y_);
+	float disfat = (float)(global_dis/100) ;
+	if((disfat > 0.2)&&(disfat < 1.0))
+         disfat = 1.0;
+         Point ob{dwa_demo.cur_x_.x_+ disfat * std::cos(x.theta_),dwa_demo.cur_x_.y_+ disfat* std::sin(x.theta_)};//1m处避章
+         dwa_demo.obs_.push_back(ob);
+        }
+
+        cmd_send2(dwa_demo.calculated_u.v_, dwa_demo.calculated_u.w_);
+		usleep(5000);
         // visualization
         cv::Mat bg(200,200, CV_8UC3, cv::Scalar(255,255,255));
         cv::circle(bg, cv_offset(goal.x_, goal.y_, bg.cols, bg.rows),
@@ -88,7 +101,7 @@ int dwa_loop(float meters){
                    3, cv::Scalar(0,0,255), 5);
 // toDegree degree = radian/pi*180;
 		printf("car state:(%.1f,%.1f,%.1f),%.1f \n",x.x_,x.y_,x.theta_,x.theta_/3.14*180);
-		printf("distance goal :%.1f \n",std::sqrt(std::pow((x.x_ - goal.x_), 2) + std::pow((x.y_ - goal.y_), 2)));
+		DEBUG(LOG_DEBUG, "distance goal :%.1f \n",std::sqrt(std::pow((x.x_ - goal.x_), 2) + std::pow((x.y_ - goal.y_), 2)));
         cv::arrowedLine(
                 bg,
                 cv_offset(x.x_, x.y_, bg.cols, bg.rows),
@@ -118,6 +131,7 @@ int dwa_loop(float meters){
         
     }
     writer.release();
+	 cmd_send2(0.0,0.0);
     return 1;
 
 

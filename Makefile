@@ -46,7 +46,6 @@ LDFLAGS += -lrt -lpthread -pthread -lm -ldl
 C_SRC=
 
 C_SRC+=src/osp.c
-C_SRC+=src/osp_common.c
 C_SRC+=src/osp_proc_data.c
 C_SRC+=src/osp_syslog.c
 C_SRC+=src/mqtt_main.c
