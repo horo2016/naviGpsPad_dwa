@@ -49,14 +49,15 @@ int dwa_loop(float meters){
 
    // cv::namedWindow("dwa", cv::WINDOW_NORMAL);
     int count = 0;
-
+    char once =0;
+    clock_t         start, stop;
     Dwa dwa_demo(start, goal, ob, config);
     static int ccn=0;
     cv::Mat final_canvas;
     Traj ltraj;
     State x;
-	Obstacle dyn_ob;
-		cv::VideoWriter writer;
+    Obstacle dyn_ob;
+	cv::VideoWriter writer;
 	writer.open("out_dwa.avi",CV_FOURCC('M', 'J', 'P', 'G'),
         20, //不进行跟踪，定位，只显示、录制时的帧率
         cv::Size(200,200),
@@ -80,13 +81,22 @@ int dwa_loop(float meters){
          Point ob{dwa_demo.cur_x_.x_+ disfat * std::cos(x.theta_),dwa_demo.cur_x_.y_+ disfat* std::sin(x.theta_)};//1m处避章
          dwa_demo.obs_.push_back(ob);
         }
-
+        if(once == 0)
+	    once =1;
+	else if(once == 1)
+	{
+	    stop = clock();
+            float   elapsedTime = (float)(stop - start) / (float)CLOCKS_PER_SEC * 1000.0f;
+	    if(elapsedTime <= (config.dt * 1000)
+		usleep((config.dt*1000 - elapsedTime-10)*1000);//延迟时间直到底盘执行完毕
+	}
         cmd_send2(dwa_demo.calculated_u.v_, dwa_demo.calculated_u.w_);
-	usleep(5000);
-	    	//w >0 左转 <0 右转
+	start = clock();//
+	usleep(100000);//100ms 后采集速度
+	   //w >0 左转 <0 右转
 	dwa_demo.feed_u.v_ =  velspeed;
 	dwa_demo.feed_u.w_ =  angspeed;
-        dwa_demo.cur_x_ = dwa_demo.motion(dwa_demo.cur_x_, feed_u, config_.dt);
+        dwa_demo.cur_x_ = dwa_demo.motion(dwa_demo.cur_x_, feed_u, config.dt);
 
         // visualization
         cv::Mat bg(200,200, CV_8UC3, cv::Scalar(255,255,255));
