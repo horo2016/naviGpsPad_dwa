@@ -93,7 +93,7 @@ float Dwa::calc_obstacle_cost(Traj traj, Obstacle ob, Config config){
             float dy = traj[ii].y_ - oy;
 
             float r = std::sqrt(dx*dx + dy*dy);
-            if (r <= config.robot_radius){//机器人半径大于道路返回
+            if (r <= config.obstacle_min_dis){//小于障碍物距离
                 return std::numeric_limits<float>::max();//有障碍物时返回最大损耗 
             }
 
