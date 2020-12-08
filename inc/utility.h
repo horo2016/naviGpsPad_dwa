@@ -48,14 +48,18 @@ struct Config{
     float min_speed = -0.5;
     float max_yawrate = 40.0 * PI / 180.0;
     float max_accel = 0.2;
-    float robot_radius = 0.6;//1 bylide 实际中注意这个机器人的半径 太大导致原地打转
     float max_dyawrate = 40.0 * PI / 180.0;
 
     float v_reso = 0.01;
     float yawrate_reso = 0.01 * PI / 180.0;
-
+//预测时间和单步执行时间
     float dt = 0.322;
     float predict_time = 3.0;
+    //障碍物最小距离
+    float obstacle_min_dis = 0.3;
+    //距离目标最小距离
+    float goal_min_dis = 1.0;
+    float robot_radius = 0.6;//1 bylide 实际中注意这个机器人的半径 太大导致原地打转
     float to_goal_cost_gain = 0.5;//1.0 权重调节 认为航向角的比重为0.5
     float speed_cost_gain = 1.0;
 };
