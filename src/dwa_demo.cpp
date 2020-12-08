@@ -70,7 +70,7 @@ int dwa_loop(float meters){
         traj.push_back(x);
 		
 
-	 if((ccn == 0)&&(global_dis <= 100))
+	 if((ccn == 0) && (global_dis <= 100) && (global_dis > 0))
         {
          ccn = 0;
 	printf("global_dis is %.1f \n",global_dis/100);
@@ -80,6 +80,7 @@ int dwa_loop(float meters){
          disfat = 1.0;
          Point ob{dwa_demo.cur_x_.x_+ disfat * std::cos(x.theta_),dwa_demo.cur_x_.y_+ disfat* std::sin(x.theta_)};//1m处避章
          dwa_demo.obs_.push_back(ob);
+	 global_dis = -1;
         }
         if(once == 0)
 	    once =1;
