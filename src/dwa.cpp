@@ -25,8 +25,6 @@ bool Dwa::stepOnceToGoal(std::vector<State>* best_trajectry, State* cur_state,Ob
 
     Traj ltraj = calc_final_input(cur_x_, calculated_u, dw, config_, goal_, obs_);
     printf("control (v,w) (%.1f,%.1f)\n ",calculated_u.v_,calculated_u.w_);
-	//w >0 左转 <0 右转
-    cur_x_ = motion(cur_x_, feed_u, config_.dt);
 
     //
     *best_trajectry = ltraj;
@@ -71,7 +69,8 @@ Traj Dwa::calc_trajectory(State x, float v, float w, Config config){
     Traj traj;
     traj.push_back(x);
     float time = 0.0;
-
+   //这里实现预测：预测时间为predicattime 3，每一次执行为config.dt 时间 ，保留的轨迹点waypoint_cnts = predicat /config.dt
+  //实际中 config.dt 应该与地盘执行时间返回时间保持一致
     while (time <= config.predict_time){
         x = motion(x, Control{v, w}, config.dt);
         traj.push_back(x);
@@ -95,7 +94,7 @@ float Dwa::calc_obstacle_cost(Traj traj, Obstacle ob, Config config){
 
             float r = std::sqrt(dx*dx + dy*dy);
             if (r <= config.robot_radius){//机器人半径大于道路返回
-                return std::numeric_limits<float>::max();
+                return std::numeric_limits<float>::max();//有障碍物时返回最大损耗 
             }
 
             if (minr >= r){
@@ -104,7 +103,7 @@ float Dwa::calc_obstacle_cost(Traj traj, Obstacle ob, Config config){
         }
     }
 
-    return 1.0 / minr;
+    return 1.0 / minr;// 里障碍物越近 返回值越大
 };
 
 float Dwa::calc_to_goal_cost(Traj traj, Point goal, Config config){
@@ -138,7 +137,7 @@ Traj Dwa::calc_final_input(
     for (float v=dw.min_v_; v<=dw.max_v_; v+=config.v_reso){
         for (float w=dw.min_w_; w<=dw.max_w_; w+=config.yawrate_reso){
 
-            Traj traj = calc_trajectory(x, v, w, config);
+            Traj traj = calc_trajectory(x, v, w, config);//模拟计算出 轨迹来
 
             float to_goal_cost = calc_to_goal_cost(traj, goal, config);
             float speed_cost = config.speed_cost_gain * (config.max_speed - traj.back().v_);
@@ -147,8 +146,8 @@ Traj Dwa::calc_final_input(
 		    // 航向得分的比重、速度得分的比重、障碍物距离得分的比重 
             //evalParam = [];
             float final_cost = 1.5*to_goal_cost + 2.5*speed_cost + ob_cost;
-
-            if (min_cost >= final_cost){
+            //计算总的损耗  损耗越小path better
+            if (final_cost  <= min_cost){
                 min_cost = final_cost;
                 min_u = Control{v, w};
                 best_traj = traj;
