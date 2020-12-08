@@ -50,7 +50,7 @@ int dwa_loop(float meters){
    // cv::namedWindow("dwa", cv::WINDOW_NORMAL);
     int count = 0;
     char once =0;
-    clock_t         start, stop;
+    clock_t         startclock, stopclock;
     Dwa dwa_demo(start, goal, ob, config);
     static int ccn=0;
     cv::Mat final_canvas;
@@ -86,18 +86,18 @@ int dwa_loop(float meters){
 	    once =1;
 	else if(once == 1)
 	{
-	    stop = clock();
-            float   elapsedTime = (float)(stop - start) / (float)CLOCKS_PER_SEC * 1000.0f;
-	    if(elapsedTime <= (config.dt * 1000)
+	    stopclock = clock();
+            float   elapsedTime = (float)(stopclock - startclock) / (float)CLOCKS_PER_SEC * 1000.0f;
+	    if(elapsedTime <= (config.dt * 1000))
 		usleep((config.dt*1000 - elapsedTime-10)*1000);//延迟时间直到底盘执行完毕
 	}
         cmd_send2(dwa_demo.calculated_u.v_, dwa_demo.calculated_u.w_);
-	start = clock();//
+	startclock = clock();//
 	usleep(100000);//100ms 后采集速度
 	   //w >0 左转 <0 右转
 	dwa_demo.feed_u.v_ =  velspeed;
 	dwa_demo.feed_u.w_ =  angspeed;
-        dwa_demo.cur_x_ = dwa_demo.motion(dwa_demo.cur_x_, feed_u, config.dt);
+        dwa_demo.cur_x_ = dwa_demo.motion(dwa_demo.cur_x_, dwa_demo.feed_u, config.dt);
 
         // visualization
         cv::Mat bg(200,200, CV_8UC3, cv::Scalar(255,255,255));
