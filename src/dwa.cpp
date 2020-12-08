@@ -30,7 +30,7 @@ bool Dwa::stepOnceToGoal(std::vector<State>* best_trajectry, State* cur_state,Ob
     *best_trajectry = ltraj;
     *cur_state = cur_x_;
 	*cur_obs = obs_;
-    if (std::sqrt(std::pow((cur_x_.x_ - goal_.x_), 2) + std::pow((cur_x_.y_ - goal_.y_), 2)) <= config_.robot_radius){
+    if (std::sqrt(std::pow((cur_x_.x_ - goal_.x_), 2) + std::pow((cur_x_.y_ - goal_.y_), 2)) <= config_.goal_min_dis){
        return true;
     }
     return false;
