@@ -11,14 +11,15 @@ public:
     Dwa(const State& start, const Point& goal,  const Obstacle& obs, const Config& config);
 
     bool stepOnceToGoal(std::vector<State>* best_trajectry, State* cur_state,Obstacle *cur_obs);
+    State motion(State x, Control u, float dt);
     Point goal_;
     Obstacle obs_;
     Config config_;
-	Control calculated_u;
-	Control feed_u;
+    Control calculated_u;
+    Control feed_u;
     State cur_x_;
 private:
-    State motion(State x, Control u, float dt);
+    
     Window calc_dynamic_window(State x, Config config);
     Traj calc_trajectory(State x, float v, float w, Config config);
     float calc_obstacle_cost(Traj traj, Obstacle ob, Config config);
