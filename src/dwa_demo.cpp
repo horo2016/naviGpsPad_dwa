@@ -67,8 +67,7 @@ int dwa_loop(float meters){
     }
     while(!dwa_demo.stepOnceToGoal(&ltraj, &x,&dyn_ob)){
         traj.push_back(x);
-		dwa_demo.feed_u.v_ =  velspeed;
-		dwa_demo.feed_u.w_ =  angspeed;
+		
 
 	 if((ccn == 0)&&(global_dis <= 100))
         {
@@ -83,7 +82,12 @@ int dwa_loop(float meters){
         }
 
         cmd_send2(dwa_demo.calculated_u.v_, dwa_demo.calculated_u.w_);
-		usleep(5000);
+	usleep(5000);
+	    	//w >0 左转 <0 右转
+	dwa_demo.feed_u.v_ =  velspeed;
+	dwa_demo.feed_u.w_ =  angspeed;
+        dwa_demo.cur_x_ = dwa_demo.motion(dwa_demo.cur_x_, feed_u, config_.dt);
+
         // visualization
         cv::Mat bg(200,200, CV_8UC3, cv::Scalar(255,255,255));
         cv::circle(bg, cv_offset(goal.x_, goal.y_, bg.cols, bg.rows),
