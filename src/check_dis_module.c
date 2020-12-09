@@ -201,6 +201,8 @@ float disMeasure(void)
 	stop = tv2.tv_sec * 1000000 + tv2.tv_usec;
 //	DEBUG(LOG_DEBUG, "stop:%d \n",stop);
 //	DEBUG(LOG_DEBUG, "stop-start:%d \n",(stop-start));//34cm/ms
+	if((stop - start) >= 38000)
+	      return 5.0;
 	DEBUG(LOG_DEBUG, "distance:%d \n",(stop - start)  * 34 / 2000);
 	dis = (stop - start)  * 34 / 2000;//µ¥Î»cm
 	//Çó³ö¾àÀë
@@ -297,13 +299,13 @@ void cmd_rasp_send(char cmd,char value)
 }
 void *getUltrasonicThread(void *arg)
 {
-
+  
   gpio_init();
  
   while(1)
   	{
 		global_dis = disMeasure();
-		usleep(100000);
+		usleep(200000);
   }
 
 }
