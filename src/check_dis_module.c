@@ -22,7 +22,26 @@
 #define mode PWM_MODE_MS
 
 float  global_dis = -1;
+#define HC_SR04_READ_TIMEOUT 100000 //us -> 100ms
 
+uint32_t time_spent = 0;
+
+static void hc_sr04_clear_timeout(void)
+{
+    time_spent = 0;
+}
+
+static uint8_t hc_sr04_is_timeout(uint16_t sleep_us)
+{
+    time_spent += sleep_us;
+
+    uint8_t is_timeout = 1;
+    if (time_spent >= HC_SR04_READ_TIMEOUT) {
+        is_timeout = 0;
+    }
+
+    return is_timeout;
+}
 void gpio_init()//echo--27    trig--28  pwm--27
 {
    wiringPiSetup();  
@@ -165,10 +184,15 @@ float disMeasure(void)
 	delayMicroseconds(10);
 	//·¢³ö³¬Éù²¨Âö³å
 	digitalWrite(28, LOW);
-	while(!(digitalRead(27) == 1));
+	hc_sr04_clear_timeout();
+	while((digitalRead(27) != 1) && (hc_sr04_is_timeout(5)){
+	      usleep(5);
+	}
 	gettimeofday(&tv1, NULL);
-	//»ñÈ¡µ±Ç°Ê±¼ä
-	while(!(digitalRead(27) == 0));
+	hc_sr04_clear_timeout();
+	while((digitalRead(27) != 0) && (hc_sr04_is_timeout(100)){
+	  usleep(100);
+	}
 	gettimeofday(&tv2, NULL);
 	//»ñÈ¡µ±Ç°Ê±¼ä
 	start = tv1.tv_sec * 1000000 + tv1.tv_usec;
