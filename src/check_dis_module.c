@@ -24,18 +24,18 @@
 float  global_dis = -1;
 #define HC_SR04_READ_TIMEOUT 100000 //us -> 100ms
 
-uint32_t time_spent = 0;
+unsigned int  time_spent = 0;
 
 static void hc_sr04_clear_timeout(void)
 {
     time_spent = 0;
 }
 
-static uint8_t hc_sr04_is_timeout(uint16_t sleep_us)
+static unsigned char  hc_sr04_is_timeout(unsigned short sleep_us)
 {
     time_spent += sleep_us;
 
-    uint8_t is_timeout = 1;
+    unsigned char is_timeout = 1;
     if (time_spent >= HC_SR04_READ_TIMEOUT) {
         is_timeout = 0;
     }
@@ -185,12 +185,12 @@ float disMeasure(void)
 	//·¢³ö³¬Éù²¨Âö³å
 	digitalWrite(28, LOW);
 	hc_sr04_clear_timeout();
-	while((digitalRead(27) != 1) && (hc_sr04_is_timeout(5)){
+	while((digitalRead(27) != 1) && (hc_sr04_is_timeout(5))){
 	      usleep(5);
 	}
 	gettimeofday(&tv1, NULL);
 	hc_sr04_clear_timeout();
-	while((digitalRead(27) != 0) && (hc_sr04_is_timeout(100)){
+	while((digitalRead(27) != 0) && (hc_sr04_is_timeout(100))){
 	  usleep(100);
 	}
 	gettimeofday(&tv2, NULL);
