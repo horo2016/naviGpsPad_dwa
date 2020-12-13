@@ -526,56 +526,62 @@ int HeadingAnalysis(int Heading,int Bearing)
      // TODO: proper thread synchronization would be better here
    
  
+     rotatethreadid = pthread_self();
      int degrees = *(int*)threadParam;
      free(threadParam);  // Must have been malloc()'d by the caller of this thread routine!!
+
      static bool threadActive = false;
      if (threadActive)
-     return 0;
+       return 0;
      threadActive = true;
-     DEBUG(LOG_DEBUG,"rotateDegreesThread  start ****************\n");
-     
-     int startHeading =   headingFilter.GetValue();//这里获得是真北方向角，所以要转动imu找到真北方向
-     
-     DEBUG(LOG_DEBUG,"startHeading %d  \n",startHeading);
-     int targetHeadingtmp =  startHeading - degrees;//得到最终的真北方向
-     if (targetHeadingtmp < 0)
+     int startHeading =  (int)heading;//这里获得是真北方向角，所以要转动imu找到真北方向
+      if (startHeading < -180)
+          startHeading += 360;
+     if (startHeading > 180)
+        startHeading -=360;
+  
+     int targetHeadingtmp =  startHeading + degrees;
+     if (targetHeadingtmp < -180)
      targetHeadingtmp += 360;
-     if (targetHeadingtmp > 359)
+     if (targetHeadingtmp > 180)
      targetHeadingtmp -=360;
      char  done = 0;
-	 DEBUG(LOG_DEBUG,"curreent heading :%d targetHeading %d ,degrees:%d \n", (int)heading,targetHeadingtmp,degrees);
+     DEBUG(LOG_DEBUG,"curreent heading :%d targetHeading %d ,degrees:%d \n", (int)heading,targetHeadingtmp,degrees);
   do{
-	     if (degrees < 0)
-	     {
 	  
-	        cmd_send(3,0);
-	     }
-	     else
-	     {
 
-	         cmd_send(4,0);
-	     }
-
-     // Backup method - use the magnetometer to see what direction we're facing.  Stop turning when we reach the target heading.
+            // Backup method - use the magnetometer to see what direction we're facing.  Stop turning when we reach the target heading.
 	     int currentHeading = (int)heading;//headingFilter.GetValue();
-	     DEBUG(LOG_DEBUG,"Rotating: currentHeading = %d   targetHeading = %d\n", currentHeading, targetHeadingtmp);
-	     if ((currentHeading >= targetHeadingtmp) && (degrees > 0) && (startHeading < targetHeadingtmp))
+	     if (currentHeading < -180)
+                  currentHeading += 360;
+            if (currentHeading > 180)
+                  currentHeading -=360;
+	     int reamainDegrees = targetHeadingtmp - currentHeading ;
+	     if (reamainDegrees < -180)
+     	          reamainDegrees += 360;
+            if (reamainDegrees > 180)
+                  reamainDegrees -=360;
+	     DEBUG(LOG_DEBUG,"Rotating:startYaw=%d,currentHeading=%d,targetHeading=%d,remainYaw:%d\n",startHeading, currentHeading,targetHeadingtmp,reamainDegrees);
+	     
+	      if ( reamainDegrees < 0)
+             {
+
+                cmd_send2(0.0,0.3);
+             }
+             else
+             {
+
+                 cmd_send2(0.0,-0.3);
+             }
+	    if (abs(reamainDegrees) <= 10)
 	     {
 	         done = 1;
 	     }
-	     if ((currentHeading <= targetHeadingtmp) && (degrees < 0) && (startHeading > targetHeadingtmp))
-	     {
-	         done = 1;
-	     }
-	     if (currentHeading < startHeading && degrees > 0)
-	         startHeading = currentHeading;
-	     if (currentHeading > startHeading && degrees < 0)
-	         startHeading = currentHeading;
  
      usleep(1000);//不要太长否则容易转过头 
      }
      while (!done);
-    cmd_send(0,0);
+    cmd_send2(0,0);
      threadActive = 0;
      return 0;
  }
@@ -733,6 +739,33 @@ bool is_thread_alive(pthread_t tid)
    
      pthread_create(&rotThreadId, NULL, rotateDegreesThread, rotationDegrees);
  }
+  void RotateDegreesByManual(int degrees)
+ {
+     pthread_t rotThreadId;
+     static bool threadActive = false;
+     if (threadActive){
+       printf("the specified thread (%lu) is into \n",rotatethreadid);
+       int kill_rc = is_thread_alive(rotatethreadid);
+        if(kill_rc == true){
+                printf("the specified thread (%lu) is alive\n",rotatethreadid);
+               return ;
+                }
+                else{
+                        printf("the specified thread (%lu) did not exists or already quit\n",rotatethreadid);
+
+                }
+         }
+
+           threadActive = true;
+
+
+
+     int *rotationDegrees = (int *)malloc(sizeof(int));
+     *rotationDegrees = degrees;
+
+     pthread_create(&rotThreadId, NULL, rotateDegreesThread1, rotationDegrees);
+ }
+
 
  /*******************************************************************************
  * function name : MoveDistance
