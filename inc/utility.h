@@ -45,16 +45,16 @@ using Obstacle = std::vector<Point>;;
 
 struct Config{
     float max_speed = 0.5;
-    float min_speed = -0.5;
-    float max_yawrate = 40.0 * PI / 180.0;
+    float min_speed = -0.0;
+    float max_yawrate = 30.0 * PI / 180.0;
     float max_accel = 0.2;
     float max_dyawrate = 40.0 * PI / 180.0;
 
-    float v_reso = 0.01;
-    float yawrate_reso = 0.01 * PI / 180.0;
+    float v_reso = 0.05;
+    float yawrate_reso = 0.5 * PI / 180.0;
 //预测时间和单步执行时间
-    float dt = 0.322;
-    float predict_time = 3.0;
+    float dt = 0.5;
+    float predict_time = 5.0;
     //障碍物最小距离
     float obstacle_min_dis = 0.3;
     //距离目标最小距离

@@ -24,7 +24,7 @@ bool Dwa::stepOnceToGoal(std::vector<State>* best_trajectry, State* cur_state,Ob
 	 
 
     Traj ltraj = calc_final_input(cur_x_, calculated_u, dw, config_, goal_, obs_);
-    printf("control (v,w) (%.1f,%.1f)\n ",calculated_u.v_,calculated_u.w_);
+//    printf("control (v,w) (%.1f,%.1f)\n ",calculated_u.v_,calculated_u.w_);
 
     //
     *best_trajectry = ltraj;

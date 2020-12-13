@@ -23,11 +23,11 @@ cv::Point2i cv_offset(    float x, float y, int image_width=200, int image_heigh
 
 //如果目标里障碍物太近 极容易导致原地画圈
 int dwa_loop(float meters){
-    State start{10.0, 0.0, 1, 0.0, 0.0};//起始坐标设定在x10m,y1m处
-	Point goal{10.0,meters};//坐标设定在x10m,y9m处
-	if(meters <= 10.0){
-   		 goal.x_ = 0.0; 
-		 goal.y_ = meters;
+    State start{10.0, 1.0, 1.6, 0.0, 0.0};//起始坐标设定在x10m,y1m处
+    Point goal{10.0,meters};//坐标设定在x10m,y9m处
+    if(meters <= 10.0){
+   		 goal.x_ = 10.0; 
+		 goal.y_ = 1.0 + meters;
 		}
     Obstacle ob{
                         
@@ -68,37 +68,54 @@ int dwa_loop(float meters){
     }
     while(!dwa_demo.stepOnceToGoal(&ltraj, &x,&dyn_ob)){
         traj.push_back(x);
-		
-
-	 if((ccn == 0) && (global_dis <= 100) && (global_dis > 0))
+         // action to wheel 
+	 if(once == 0)
+            once =1;
+        else if(once == 1)
         {
-         ccn = 0;
-	printf("global_dis is %.1f \n",global_dis/100);
- 	printf("dwa_demo.cur_%.1f %.1f \n", dwa_demo.cur_x_.x_,dwa_demo.cur_x_.y_);
+            stopclock = clock();
+            float   elapsedTime = (float)(stopclock - startclock) / (float)CLOCKS_PER_SEC * 1000.0f;
+             DEBUG(LOG_DEBUG,"elapsed time:%3.1f ms \n", elapsedTime);
+            if(elapsedTime <= (config.dt * 1000)){
+                        DEBUG(LOG_DEBUG,"sleep total time:%3.1f ms \n",(config.dt*1000 - elapsedTime-10));
+                        usleep((config.dt*1000 - elapsedTime - 1 )*1000);//延迟时间直到底盘执行完毕
+                }
+        }
+         DEBUG(LOG_DEBUG,"1 control tocar v=%.1f,w=%.1f\n", dwa_demo.calculated_u.v_, dwa_demo.calculated_u.w_);
+        cmd_send2(dwa_demo.calculated_u.v_, dwa_demo.calculated_u.w_);
+        startclock = clock();//
+        usleep(100000);//100ms 后采集速度
+           //w >0 左转 <0 右转
+        dwa_demo.feed_u.v_ =  velspeed;
+        dwa_demo.feed_u.w_ =  angspeed;
+        DEBUG(LOG_DEBUG,"2 car receive info v=%.1f,w=%.1f\n", dwa_demo.feed_u.v_, dwa_demo.feed_u.w_);
+        dwa_demo.cur_x_ = dwa_demo.motion(dwa_demo.cur_x_, dwa_demo.feed_u, config.dt);
+        //avoidance check		
+         DEBUG(LOG_DEBUG,"global_dis mesuare is %.1f \n",global_dis/100);
+	 if( (global_dis <= 80) && (global_dis > 0))
+        {
+ //	DEBUG(LOG_DEBUG,"global_dis mesuare is %.1f \n",global_dis/100);
+ 	DEBUG(LOG_DEBUG,"dwa_demo.cur_%.1f %.1f \n", dwa_demo.cur_x_.x_,dwa_demo.cur_x_.y_);
 	float disfat = (float)(global_dis/100) ;
-	if((disfat > 0.2)&&(disfat < 1.0))
-         disfat = 1.0;
-         Point ob{dwa_demo.cur_x_.x_+ disfat * std::cos(x.theta_),dwa_demo.cur_x_.y_+ disfat* std::sin(x.theta_)};//1m处避章
+	if((disfat > 0.3)&&(disfat < 0.5))
+	{
+         disfat = 1.5;
+          Point ob{dwa_demo.cur_x_.x_+ disfat * std::cos(x.theta_),dwa_demo.cur_x_.y_+ disfat* std::sin(x.theta_)};//1m处避章
          dwa_demo.obs_.push_back(ob);
+	}else  
+          if((disfat > 0.0)&&(disfat < 0.3))
+	{
+	 //disfat = 1.5;
+//          Point ob{dwa_demo.cur_x_.x_+ disfat * std::cos(x.theta_),dwa_demo.cur_x_.y_+ disfat* std::sin(x.theta_)};//1m处避章
+  //       dwa_demo.obs_.push_back(ob);
+	  cmd_send2(0.0,0.0);
+           do{
+              cmd_send2(-0.3,0.0);
+	      usleep(300000); 
+	    }while(global_dis <= 30);
+	}
 	 global_dis = -1;
         }
-        if(once == 0)
-	    once =1;
-	else if(once == 1)
-	{
-	    stopclock = clock();
-            float   elapsedTime = (float)(stopclock - startclock) / (float)CLOCKS_PER_SEC * 1000.0f;
-	    if(elapsedTime <= (config.dt * 1000))
-		usleep((config.dt*1000 - elapsedTime-10)*1000);//延迟时间直到底盘执行完毕
-	}
-        cmd_send2(dwa_demo.calculated_u.v_, dwa_demo.calculated_u.w_);
-	startclock = clock();//
-	usleep(100000);//100ms 后采集速度
-	   //w >0 左转 <0 右转
-	dwa_demo.feed_u.v_ =  velspeed;
-	dwa_demo.feed_u.w_ =  angspeed;
-        dwa_demo.cur_x_ = dwa_demo.motion(dwa_demo.cur_x_, dwa_demo.feed_u, config.dt);
-
         // visualization
         cv::Mat bg(200,200, CV_8UC3, cv::Scalar(255,255,255));
         cv::circle(bg, cv_offset(goal.x_, goal.y_, bg.cols, bg.rows),
@@ -115,8 +132,8 @@ int dwa_loop(float meters){
         cv::circle(bg, cv_offset(x.x_, x.y_, bg.cols, bg.rows),
                    3, cv::Scalar(0,0,255), 5);
 // toDegree degree = radian/pi*180;
-		printf("car state:(%.1f,%.1f,%.1f),%.1f \n",x.x_,x.y_,x.theta_,x.theta_/3.14*180);
-		DEBUG(LOG_DEBUG, "distance goal :%.1f \n",std::sqrt(std::pow((x.x_ - goal.x_), 2) + std::pow((x.y_ - goal.y_), 2)));
+		DEBUG(LOG_DEBUG,"car state:(%.1f,%.1f,%.1f),%.1f \n",x.x_,x.y_,x.theta_,x.theta_/3.14*180);
+		DEBUG(LOG_DEBUG, "remain to goal distance is:%.1f \n",std::sqrt(std::pow((x.x_ - goal.x_), 2) + std::pow((x.y_ - goal.y_), 2)));
         cv::arrowedLine(
                 bg,
                 cv_offset(x.x_, x.y_, bg.cols, bg.rows),

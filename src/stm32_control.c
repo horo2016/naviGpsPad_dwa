@@ -298,12 +298,12 @@ int *stm_Loop()
 					//vr.cvalue[i] = r_buffer[26+i];
 					//vl.cvalue[i] = r_buffer[30+i];
 				}	
-				 printf("*****************************\n");
+			/*	 printf("*****************************\n");
 				 printf("car inform vx.cvalue:%.3f \n",vx.fvalue);
 				 printf("car inform va.cvalue:%.3f \n",va.fvalue);
 				 printf("car inform px.cvalue:%.3f \n",posx.fvalue);
 				 printf("car inform py.cvalue:%.3f \n",posy.fvalue);
-
+			*/
 				 velspeed = (vx.fvalue);
 				 angspeed = (va.fvalue);
 				 positionx = posx.fvalue *10;

@@ -203,7 +203,7 @@ float disMeasure(void)
 //	DEBUG(LOG_DEBUG, "stop-start:%d \n",(stop-start));//34cm/ms
 	if((stop - start) >= 38000)
 	      return 5.0;
-	DEBUG(LOG_DEBUG, "distance:%d \n",(stop - start)  * 34 / 2000);
+//	DEBUG(LOG_DEBUG, "distance:%d \n",(stop - start)  * 34 / 2000);
 	dis = (stop - start)  * 34 / 2000;//µ¥Î»cm
 	//Çó³ö¾àÀë
 	return  (float)dis;
@@ -305,7 +305,7 @@ void *getUltrasonicThread(void *arg)
   while(1)
   	{
 		global_dis = disMeasure();
-		usleep(200000);
+		usleep(500000);
   }
 
 }
