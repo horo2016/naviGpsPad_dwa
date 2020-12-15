@@ -24,7 +24,7 @@
 float  global_dis = -1;
 #define HC_SR04_READ_TIMEOUT 100000 //us -> 100ms
 
-unsigned int  time_spent = 0;
+static unsigned int  time_spent = 0;
 
 static void hc_sr04_clear_timeout(void)
 {
@@ -297,7 +297,7 @@ void cmd_rasp_send(char cmd,char value)
 
 
 }
-void *getUltrasonicThread(void *arg)
+void *getSingleUltrasonicThread(void *arg)
 {
   
   gpio_init();
