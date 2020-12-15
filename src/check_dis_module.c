@@ -45,7 +45,7 @@ static unsigned char  hc_sr04_is_timeout(unsigned short sleep_us)
 void gpio_init()//echo--27    trig--28  pwm--27
 {
    wiringPiSetup();  
-	pinMode (27, INPUT) ; //echo
+	pinMode (29, INPUT) ; //echo
 	pinMode (28, OUTPUT) ; //trig
 	//pinMode (27, OUTPUT) ; //pwm sg09
 
@@ -185,12 +185,12 @@ float disMeasure(void)
 	//·¢³ö³¬Éù²¨Âö³å
 	digitalWrite(28, LOW);
 	hc_sr04_clear_timeout();
-	while((digitalRead(27) != 1) && (hc_sr04_is_timeout(5))){
+	while((digitalRead(29) != 1) && (hc_sr04_is_timeout(5))){
 	      usleep(5);
 	}
 	gettimeofday(&tv1, NULL);
 	hc_sr04_clear_timeout();
-	while((digitalRead(27) != 0) && (hc_sr04_is_timeout(100))){
+	while((digitalRead(29) != 0) && (hc_sr04_is_timeout(100))){
 	  usleep(100);
 	}
 	gettimeofday(&tv2, NULL);
@@ -203,7 +203,7 @@ float disMeasure(void)
 //	DEBUG(LOG_DEBUG, "stop-start:%d \n",(stop-start));//34cm/ms
 	if((stop - start) >= 38000)
 	      return 5.0;
-//	DEBUG(LOG_DEBUG, "distance:%d \n",(stop - start)  * 34 / 2000);
+	DEBUG(LOG_DEBUG, "distance:%d \n",(stop - start)  * 34 / 2000);
 	dis = (stop - start)  * 34 / 2000;//µ¥Î»cm
 	//Çó³ö¾àÀë
 	return  (float)dis;

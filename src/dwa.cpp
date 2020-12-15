@@ -21,7 +21,7 @@ bool Dwa::stepOnceToGoal(std::vector<State>* best_trajectry, State* cur_state,Ob
      
 	
     Window dw = calc_dynamic_window(cur_x_, config_);
-	 
+    printf("window:%.1f,%.1f,%.1f,%.1f \n",dw.min_v_,dw.max_v_,dw.min_w_,dw.max_w_);	 
 
     Traj ltraj = calc_final_input(cur_x_, calculated_u, dw, config_, goal_, obs_);
 //    printf("control (v,w) (%.1f,%.1f)\n ",calculated_u.v_,calculated_u.w_);
@@ -51,8 +51,8 @@ Window Dwa::calc_dynamic_window(State x, Config config){
     return {
             std::max((x.v_ - config.max_accel * config.dt), config.min_speed),
             std::min((x.v_ + config.max_accel * config.dt), config.max_speed),
-            std::max((x.w_ - config.max_dyawrate * config.dt), -config.max_yawrate),
-            std::min((x.w_ + config.max_dyawrate * config.dt), config.max_yawrate)
+            std::max((x.w_ - config.max_dyawrate * config.dt), config.min_yawrate),
+            std::min((x.w_ + config.max_dyawrate * config.dt), config.max_yawrate)+0.1
     };
 
 //    return {
