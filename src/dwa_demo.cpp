@@ -99,8 +99,11 @@ int dwa_loop(float meters){
 	float disfat = (float)(global_dis/100) ;
 	if((disfat > 0.3)&&(disfat < 0.5))
 	{
-         disfat = 1.5;
+          disfat = 1.5;
           Point ob{dwa_demo.cur_x_.x_+ disfat * std::cos(x.theta_),dwa_demo.cur_x_.y_+ disfat* std::sin(x.theta_)};//1m处避章
+	  //theta *3.1415/180; 
+   	  //Point ob_right{dwa_demo.cur_x_.x_+ disfat * std::cos(x.theta_+45*3.1415/180),dwa_demo.cur_x_.y_+ disfat* std::sin(x.theta_+45*3.1415/180)};//1m处避章
+          //Point ob_left{dwa_demo.cur_x_.x_+ disfat * std::cos(x.theta_-45*3.1415/180),dwa_demo.cur_x_.y_+ disfat* std::sin(x.theta_-45*3.1415/180)};//1m处避章
          dwa_demo.obs_.push_back(ob);
 	}else  
           if((disfat > 0.0)&&(disfat < 0.3))
