@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-extern void *getUltrasonicThread(void *arg);
+extern void *getSingleUltrasonicThread(void *arg);
 extern void car_stop();
 extern void car_forward();
 extern void turn_left();
