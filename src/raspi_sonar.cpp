@@ -199,7 +199,7 @@ int main_sonar()
 			DEBUG(LOG_DEBUG,"SONAR %d \n",sonar.id);
 			sonar_trigger(sonar.id);
 			echo_callback(sonar.id);
-            sleep(1);
+            usleep(100000);
         }
        
     }
