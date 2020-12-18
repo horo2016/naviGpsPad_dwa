@@ -81,7 +81,7 @@ static std::vector<Sonar> sonars;
 #define HC_SR04_READ_TIMEOUT 100000 //us -> 100ms
 
 static unsigned int  time_spent = 0;
-
+sonar_dis  raspi_sonars[3];
 static void hc_sr04_clear_timeout(void)
 {
     time_spent = 0;
@@ -198,7 +198,7 @@ int main_sonar()
         for (auto& sonar: sonars) {
 			DEBUG(LOG_DEBUG,"SONAR %d \n",sonar.id);
 			sonar_trigger(sonar.id);
-			echo_callback(sonar.id);
+		        raspi_sonars[sonar.id].distance = echo_callback(sonar.id);
             usleep(100000);
         }
        

@@ -12,6 +12,7 @@
 #include "dwa_demo.h"
 #include "stm32_control.h"
 #include "check_dis_module.h"
+#include "raspi_sonar.h"
 //20m*20m
 cv::Point2i cv_offset(    float x, float y, int image_width=200, int image_height=200)
 {
@@ -20,7 +21,48 @@ cv::Point2i cv_offset(    float x, float y, int image_width=200, int image_heigh
     output.y = image_height - int(y * 10) ;
     return output;
 };
+int update_obstacle(Dwa dwa_dem,State x)
+{
+     for(int i =0;i < 3;i ++)
+    {
+	 DEBUG(LOG_DEBUG,"global_dis mesuare is %.1f \n",global_dis/100);
+         if( (raspi_sonars[i].distance <= 80.0) && (raspi_sonars[i].distance  > 0.0))
+        {
+          DEBUG(LOG_DEBUG,"dwa_demo.cur_%.1f %.1f \n", dwa_dem.cur_x_.x_,dwa_dem.cur_x_.y_);
+          float disfat = (float)( raspi_sonars[i].distance /100) ;
+          if((disfat >= 0.3)&&(disfat < 0.5))
+          {
+            disfat = 1.0;
+           if(i == 1) {
+		Point ob{dwa_dem.cur_x_.x_+ disfat * std::cos(x.theta_),dwa_dem.cur_x_.y_+ disfat* std::sin(x.theta_)};//1m处避章
+		dwa_dem.obs_.push_back(ob);
+	   }
+          //theta *3.1415/180;
+	  // car left id =2 
+          else if(i == 2){
+		Point ob{dwa_dem.cur_x_.x_+ disfat * std::cos(x.theta_ + 45*3.1415/180),dwa_dem.cur_x_.y_+ disfat* std::sin(x.theta_+45*3.1415/180)};//1m处避章
+		dwa_dem.obs_.push_back(ob);
+	  }
+          //car right id =0
+	  else if(i == 0){
+		Point ob{dwa_dem.cur_x_.x_+ disfat * std::cos(x.theta_ - 45*3.1415/180),dwa_dem.cur_x_.y_+ disfat* std::sin(x.theta_-45*3.1415/180)};//1m处避章
+           	dwa_dem.obs_.push_back(ob);
+	  }
+           dwa_dem.cur_x_.v_ =0.05;
+          }
+	  if((disfat > 0.0)&&(disfat < 0.3)&&(i == 1))
+          {
+            cmd_send2(0.0,0.0);
+            do{
+                cmd_send2(-0.3,0.0);
+                usleep(300000);
+              }while(disfat <= 0.30);
+          }
+         raspi_sonars[i].distance = -1;
+        }
+   }
 
+}
 //如果目标里障碍物太近 极容易导致原地画圈
 int dwa_loop(float meters){
     State start{10.0, 1.0, 1.6, 0.0, 0.0};//起始坐标设定在x10m,y1m处

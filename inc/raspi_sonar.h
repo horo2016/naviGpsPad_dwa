@@ -4,6 +4,12 @@
 extern "C" {
 #endif
 
+typedef  struct{
+	float distance;
+	
+}sonar_dis;
+
+extern sonar_dis raspi_sonars[3];
 
 extern  void *getUltrasonicThread(void *arg);
 
