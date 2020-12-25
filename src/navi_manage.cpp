@@ -475,27 +475,33 @@ int HeadingAnalysis(int Heading,int Bearing)
     // targetHeadingtmp -=360;
      char  done = 0;
      int heading_sum =0;
+	 int waitquit =0;
 	 DEBUG(LOG_DEBUG,"targetHeading %d ,turn degrees:%d \n",finnalheading,degrees);
   do{
 	     if (degrees < 0)
 	     {
 	  
-	        cmd_send2(0.0,-0.15);
+	        cmd_send2(0.0,-0.2);
 	     }
 	     else
 	     {
 
-	         cmd_send2(0.0,0.15);
+	         cmd_send2(0.0,0.2);
 	     }
+	     usleep(5000);
+             if(waitquit ++> 3000)
+	       {
+		waitquit =0;
+		cmd_send2(0.0,0.0);
+                 usleep(500000);
+		}
+   
      // Backup method - use the magnetometer to see what direction we're facing.  Stop turning when we reach the target heading.
 	     int currentHeading  = int(heading);//headingFilter.GetValue();
 	     heading_sum =0;
-  		for(int i=0;i<3;i++)
-		 {
 		 	    currentHeading  = int(heading);
 		 		heading_sum += currentHeading;
-	     }
-		 int currentHeading_sec = heading_sum /3;
+		 int currentHeading_sec = heading_sum ;
 	     DEBUG(LOG_DEBUG,"Rotating: currentHeading =%d,targetHeading = %d\n", currentHeading_sec, finnalheading);
 	     if (abs(currentHeading_sec - finnalheading) <= 10)
 	     {
