@@ -158,7 +158,7 @@ unsigned long millis()
     double c = 2 * atan2(sqrt(a), sqrt(1 - a));
     double d = R * c;
     double dis = round(d);//近似值
-    DEBUG(LOG_DEBUG,"currenpoint isinrange circle  distance :%.2f ? %d\n",dis,raduis);
+    DEBUG(LOG_DEBUG,"currenpoint range circle  distance :%.2f  %d\n",dis,raduis);
     if (dis <= raduis){  //点在圆内
         return 1;
     }else {
@@ -465,7 +465,7 @@ int HeadingAnalysis(int Heading,int Bearing)
      threadActive = true;
      DEBUG(LOG_DEBUG,"rotateDegreesThread  start ****************\n");
      
-     int startHeading =   headingFilter.GetValue();//这里获得是真北方向角，所以要转动imu找到真北方向
+     int startHeading =  (int)heading ;//headingFilter.GetValue();//这里获得是真北方向角，所以要转动imu找到真北方向
      
      DEBUG(LOG_DEBUG,"startHeading %d  \n",startHeading);
      int degrees  =  startHeading - finnalheading;//得到最终的真北方向
@@ -480,27 +480,23 @@ int HeadingAnalysis(int Heading,int Bearing)
 	     if (degrees < 0)
 	     {
 	  
-	        cmd_send(3,0);
+	        cmd_send2(0.0,0.1);
 	     }
 	     else
 	     {
 
-	         cmd_send(4,0);
+	         cmd_send2(0.0,-0.1);
 	     }
-         usleep(500000);
-		 cmd_send(0,0);
-		  usleep(500000);
      // Backup method - use the magnetometer to see what direction we're facing.  Stop turning when we reach the target heading.
 	     int currentHeading  = int(heading);//headingFilter.GetValue();
 	     heading_sum =0;
   		for(int i=0;i<3;i++)
 		 {
 		 	    currentHeading  = int(heading);
-				usleep(500000);
 		 		heading_sum += currentHeading;
 	     }
 		 int currentHeading_sec = heading_sum /3;
-	     DEBUG(LOG_DEBUG,"Rotating: currentHeading = %d   targetHeading = %d\n", currentHeading_sec, finnalheading);
+	     DEBUG(LOG_DEBUG,"Rotating: currentHeading =%d,targetHeading = %d\n", currentHeading_sec, finnalheading);
 	     if (abs(currentHeading_sec - finnalheading) <= 10)
 	     {
 	         done = 1;
@@ -513,7 +509,7 @@ int HeadingAnalysis(int Heading,int Bearing)
      //sleep(1);//不要太长否则容易转过头 
      }
      while (!done);
-    cmd_send(0,0);
+    cmd_send2(0,0);
      threadActive = 0;
       GLOBAL_STATUS = MOVE_STATUS ;
 	   DEBUG(LOG_DEBUG,"rotate thread exit \n");
@@ -718,10 +714,10 @@ bool is_thread_alive(pthread_t tid)
      pthread_t rotThreadId;
      static bool threadActive = false;
      if (threadActive){
-       printf("the specified thread (%lu) is into \n",rotatethreadid);
+       //printf("the specified thread (%lu) is into \n",rotatethreadid);
        int kill_rc = is_thread_alive(rotatethreadid);
 	if(kill_rc == true){
-		printf("the specified thread (%lu) is alive\n",rotatethreadid);
+	//	printf("the specified thread (%lu) is alive\n",rotatethreadid);
 	       return ;
 		}
 		else{
@@ -912,7 +908,7 @@ void *navimanage_handle (void *arg)
 					DEBUG(LOG_DEBUG,"STANDBY STATUS \n");
 	                lastGPSMillis =0 ;
 		        	ReadWaypointsFile();
-					CalculateHeadingToWaypoint();
+				CalculateHeadingToWaypoint();
 		        	CalculateDistanceToWaypoint();
 	                GLOBAL_STATUS = ROTATE_STATUS ;
 	                break;
