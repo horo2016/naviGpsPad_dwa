@@ -480,12 +480,12 @@ int HeadingAnalysis(int Heading,int Bearing)
 	     if (degrees < 0)
 	     {
 	  
-	        cmd_send2(0.0,0.1);
+	        cmd_send2(0.0,-0.15);
 	     }
 	     else
 	     {
 
-	         cmd_send2(0.0,-0.1);
+	         cmd_send2(0.0,0.15);
 	     }
      // Backup method - use the magnetometer to see what direction we're facing.  Stop turning when we reach the target heading.
 	     int currentHeading  = int(heading);//headingFilter.GetValue();

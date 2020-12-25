@@ -142,7 +142,7 @@ float echo_callback( uint32_t id)
 //	DEBUG(LOG_DEBUG, "stop-start:%d \n",(stop-start));//34cm/ms
 	if((stop - start) >= 38000)
 	      return 5.0;
-	DEBUG(LOG_DEBUG, "distance:%d \n",(stop - start)  * 34 / 2000);
+//	DEBUG(LOG_DEBUG, "distance:%d \n",(stop - start)  * 34 / 2000);
 	dis = (stop - start)  * 34 / 2000;// 
 	 
 	return  (float)dis;
@@ -196,7 +196,6 @@ int main_sonar()
     int id =0;
     while (1) {
         for (auto& sonar: sonars) {
-			DEBUG(LOG_DEBUG,"SONAR %d \n",sonar.id);
 			sonar_trigger(sonar.id);
 		        raspi_sonars[sonar.id].distance = echo_callback(sonar.id);
             usleep(100000);
