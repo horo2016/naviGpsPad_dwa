@@ -73,7 +73,7 @@ CXX_SRC+= src/cpu_sys.cpp
 CXX_SRC+= $(CXXFILES)
 CXX_SRC +=  src/dwa.cpp
 CXX_SRC +=  src/raspi_sonar.cpp
-
+CXX_SRC +=  src/SimpleKalmanFilter.cpp
 OBJ=
 DEP=
 OBJECTS_DIR   = objects/

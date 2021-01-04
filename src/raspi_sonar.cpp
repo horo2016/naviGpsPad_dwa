@@ -27,12 +27,46 @@
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 #include "raspi_sonar.h"
+
+#include "SimpleKalmanFilter.h"
+
  //gcc raspi_sonar.cpp -lpthread -lstdc++
 
 //#include <boost/algorithm/string.hpp>
 
 double min_freq = 0.5;
 double max_freq = 60;
+
+
+
+uint8_t leftSensor;             //Store the sensor's value.
+uint8_t centerSensor;
+uint8_t rightSensor;
+
+bool isObstacleLeft;           //If obstacle detected or not.
+bool isObstacleCenter;
+bool isObstacleRight;
+
+
+uint8_t MIN_RANGE_OBSTACLE = 5; //Between 0 and 5 cm is the blind zone of the sensor.
+uint8_t MAX_RANGE_OBSTACLE = 75; //The maximum range to check if obstacle exists.
+ 
+
+SimpleKalmanFilter KF_Left(2, 2, 0.01);
+SimpleKalmanFilter KF_Center(2, 2, 0.01);
+SimpleKalmanFilter KF_Right(2, 2, 0.01);
+
+enum NavigationStates {
+  CHECK_ALL,
+  MAX_SPEED,
+  SPEED_DECREASE,
+  CHECK_OBSTACLE_POSITION,
+  LEFT,
+  CENTER,
+  RIGHT,
+  BACK
+};
+NavigationStates _navState = CHECK_ALL;
 
 int gpio = -1;
 pthread_t* sonarthread;
@@ -168,44 +202,162 @@ int setup_gpio()
     return true;
 }
 
-int main_sonar()
+
+bool my_caculate_direction()
 {
-    
 
-    double field_of_view;
-    double min_range;
-    double max_range;
-
-
-    // pin numbers are specific to the hardware
-    sonars.push_back(Sonar(28, 29, 0));
-    sonars.push_back(Sonar(26, 27, 1));
-    sonars.push_back(Sonar(24, 25, 2));
-   // sonars.push_back(Sonar(27, 22, 3));
-   // sonars.push_back(Sonar(19, 26, 4));
-
-    if (!setup_gpio()) {
-        printf("Cannot initalize gpio");
-        return 1;
-    }
-
- 
-
-     
-     
-    int id =0;
-    while (1) {
-        for (auto& sonar: sonars) {
-			sonar_trigger(sonar.id);
-		        raspi_sonars[sonar.id].distance = echo_callback(sonar.id);
-            usleep(100000);
+	if (isObstacleLeft == 0 && isObstacleRight == 0) {
+          
+          if(heading > targetHeading )
+		  	return true ;//turn left 
+		  	else return false ;
         }
-       
-    }
- 
 
-    return 0;
 }
+//Obstacle avoidance algorithm.
+void obstacleAvoidance()
+{
+  switch (_navState) {
+    case CHECK_ALL: { //if no obstacle, go forward at maximum speed
+        if (isObstacleLeft == 0 && isObstacleCenter == 0 && isObstacleRight == 0) {
+          _navState = MAX_SPEED;
+        } else {
+          
+          _navState = SPEED_DECREASE;
+        }
+      } break;
+ 
+    case MAX_SPEED: {
+		 if(velspeed < MAX_SPEED)
+         cmd_send2(velspeed + SPEED_RESO,0.0);
+		 else  cmd_send2(MAX_SPEED,0.0);
+        _navState = CHECK_ALL;
+      } break;
+ 
+    case SPEED_DECREASE: {
+        cmd_send2(0.2,0.0);
+        //Wait for few more readings at low speed and then go to check the obstacle position
+         _navState = CHECK_OBSTACLE_POSITION;
+      } break;
+ 
+    case CHECK_OBSTACLE_POSITION: {
+        //If the path is free, go again to MAX_SPEED else check the obstacle position
+        if (isObstacleLeft == 0 && isObstacleCenter == 0 && isObstacleRight == 0) {
+          _navState = MAX_SPEED;
+        }
+        else if (isObstacleLeft == 1 && isObstacleCenter == 0 && isObstacleRight == 0) {
+          
+          _navState = LEFT;
+        }
+        else if (isObstacleLeft == 0 && isObstacleCenter == 1 && isObstacleRight == 0) {
+          
+          _navState = CENTER;
+        }
+        else if (isObstacleLeft == 0 && isObstacleCenter == 0 && isObstacleRight  == 1) {
+          
+          _navState = RIGHT;
+        }
+        else if (isObstacleLeft == 1 && isObstacleCenter == 1 && isObstacleRight == 1) {
+          
+          _navState = BACK;
+        }
+      } break;
+  
+    case LEFT: { //Move left and check obstacle. If obstacle exists, go again to left, else exit
+        cmd_send2(0.0,0.2);
+        
+          if (isObstacleLeft == 1) _navState = LEFT;
+          else _navState = CHECK_ALL;
+        
+      } break;
+ 
+    case CENTER: { //If obstacle exists, go left or right
+
+	    if(my_caculate_direction == true )
+			 _navState = LEFT;
+		else  _navState = RIGHT;
+		break;
+ 
+    case RIGHT: {
+        cmd_send2(0.0,-0.2);
+        
+          if (isObstacleRight == 1) _navState = RIGHT;
+          else _navState = CHECK_ALL;
+        
+      } break;
+ 
+    case BACK: {
+
+	    if(isObstacleCenter )
+	   {
+	
+	       cmd_send2(0.0,0.0);
+           do{
+              cmd_send2(-0.3,0.0);
+	          usleep(300000); 
+	    }while(isObstacleCenter);
+        
+       if(my_caculate_direction == true )
+			 _navState = LEFT;
+		else  _navState = RIGHT;
+      } 
+		break;
+  }
+}
+
+
+
+ //Define the minimum and maximum range of the sensors, and return true if an obstacle is in range.
+ bool obstacleDetection(int sensorRange) {
+     if ((MIN_RANGE_OBSTACLE <= sensorRange) && (sensorRange <= MAX_RANGE_OBSTACLE)) return true; 
+   else return false;
+ }
+
+ //Apply Kalman Filter to sensor reading.
+ void applyKF() {
+   isObstacleLeft = obstacleDetection(KF_Left.updateEstimate(raspi_sonars[2].distance));
+   isObstacleCenter = obstacleDetection(KF_Center.updateEstimate(raspi_sonars[1].distance));
+   isObstacleRight = obstacleDetection(KF_Right.updateEstimate(raspi_sonars[0].distance));
+ }
+ int main_sonar()
+ {
+	 
+ 
+	 double field_of_view;
+	 double min_range;
+	 double max_range;
+ 
+ 
+	 // pin numbers are specific to the hardware
+	 sonars.push_back(Sonar(28, 29, 0));
+	 sonars.push_back(Sonar(26, 27, 1));
+	 sonars.push_back(Sonar(24, 25, 2));
+	// sonars.push_back(Sonar(27, 22, 3));
+	// sonars.push_back(Sonar(19, 26, 4));
+ 
+	 if (!setup_gpio()) {
+		 printf("Cannot initalize gpio");
+		 return 1;
+	 }
+ 
+  
+ 
+	  
+	  
+	 int id =0;
+	 while (1) {
+		 for (auto& sonar: sonars) {
+			 sonar_trigger(sonar.id);
+				 raspi_sonars[sonar.id].distance = echo_callback(sonar.id);
+				 applyKF();
+			 usleep(100000);
+		 }
+		
+	 }
+  
+ 
+	 return 0;
+ }
 
  void *getUltrasonicThread(void *arg)
  {

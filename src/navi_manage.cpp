@@ -606,13 +606,7 @@ int HeadingAnalysis(int Heading,int Bearing)
      int meters = *(int *)threadParam;
      free(threadParam);  // Must have been malloc()'d by the caller of this thread routine!!
 
-	 static bool threadActive = false;
-     if (threadActive)
-{
-     printf("yhread have been running ,return ");
-     return 0;
-}
-     threadActive = true;
+
      DEBUG(LOG_DEBUG,"moveDistanceThread  start ****************\n");
      int startPosition = positionx;
      DEBUG(LOG_DEBUG,"startPosition %d  \n",startPosition);
@@ -622,20 +616,8 @@ int HeadingAnalysis(int Heading,int Bearing)
 	 DEBUG(LOG_DEBUG,"targetPosition: %d ,meters:%d \n",targetPosition,meters);
   do{
   	 
-	     if (meters < 0)
-	     {
-	            cmd_send(1,0);
-	     }
-	     else
-	     {
-	           if(targetPosition - (int)positionx > 20){
-	            cmd_send(2,50);//以比较高的速度运行
-	           	}
-	           else {
-			   	cmd_send(2,40);
-	           	}
-	     }
-
+	   
+     obstacleAvoidance();
 
      // Backup method - use the magnetometer to see what direction we're facing.  Stop turning when we reach the target heading.
      int currentPosition = (int)positionx;
@@ -652,7 +634,7 @@ int HeadingAnalysis(int Heading,int Bearing)
      usleep(10000);
      }
      while ((!done)&&(GLOBAL_STATUS == MOVE_STATUS));
-    cmd_send(0,0);
+    cmd_send2(0.0,0.0);
 	
      threadActive = 0;
 	    DEBUG(LOG_DEBUG,"move distance  thread exit \n");
@@ -786,17 +768,9 @@ bool is_thread_alive(pthread_t tid)
 	 
      if (threadActive){
        printf("the specified MoveDistance thread (%lu) is into \n",rotThreadId);
-      /* int kill_rc = is_thread_alive(rotThreadId);
-	if(kill_rc == true){
-		printf("the specified thread (%lu) is alive\n",rotThreadId);
-	       return ;
-		}
-		else{
-			printf("the specified thread (%lu) did not exists or already quit\n",rotThreadId);
-		     
-		}	*/
+ 
 
-	       int kill_rc = pthread_kill(movethreadid,0);
+	    int kill_rc = pthread_kill(movethreadid,0);
 		if(kill_rc == ESRCH)
 		printf("the specified thread (%lu) did not exists or already quit\n",movethreadid);
 		else if(kill_rc == EINVAL)
@@ -914,7 +888,7 @@ void *navimanage_handle (void *arg)
 					DEBUG(LOG_DEBUG,"STANDBY STATUS \n");
 	                lastGPSMillis =0 ;
 		        	ReadWaypointsFile();
-				CalculateHeadingToWaypoint();
+				    CalculateHeadingToWaypoint();
 		        	CalculateDistanceToWaypoint();
 	                GLOBAL_STATUS = ROTATE_STATUS ;
 	                break;

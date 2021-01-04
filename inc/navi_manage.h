@@ -20,6 +20,11 @@ extern char  GLOBAL_SWITCH;
 #define DIS_BLINK_INTERVAL 500
 #define CALCULATE_GPS_HEADING_INTERVAL 1000
 
+
+
+#define MAX_SPEED    0.5
+#define SPEED_RESO    0.05
+
 extern char  GLOBAL_STATUS ;
 extern int currentWaypoint ;
 

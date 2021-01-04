@@ -13,6 +13,7 @@ extern sonar_dis raspi_sonars[3];
 
 extern  void *getUltrasonicThread(void *arg);
 
+extern void obstacleAvoidance();
 #ifdef __cplusplus
 }
 #endif
