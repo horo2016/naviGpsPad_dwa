@@ -111,9 +111,9 @@ float Dwa::calc_to_goal_cost(Traj traj, Point goal, Config config){
     float goal_magnitude = std::sqrt(goal.x_*goal.x_ + goal.y_*goal.y_);
     float traj_magnitude = std::sqrt(std::pow(traj.back().x_, 2) + std::pow(traj.back().y_, 2));
     float dot_product = (goal.x_ * traj.back().x_) + (goal.y_ * traj.back().y_);
-    float error = dot_product / (goal_magnitude * traj_magnitude);
-    float error_angle = std::acos(error);
-    float cost = config.to_goal_cost_gain * error_angle;
+    float error = dot_product / (goal_magnitude * traj_magnitude); //error <= 1; [-1,1]
+    float error_angle = std::acos(error);//acos(1)=0  只有当goal=traj的时候erroe =1
+    float cost = config.to_goal_cost_gain * error_angle;//越接近目标 acos 趋近于0
 
     return cost;
 };
