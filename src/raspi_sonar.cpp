@@ -206,12 +206,12 @@ int setup_gpio()
 bool my_caculate_direction()
 {
 
-	if (isObstacleLeft == 0 && isObstacleRight == 0) {
+	/*if (isObstacleLeft == 0 && isObstacleRight == 0) {
           
           if(heading > targetHeading )
 		  	return true ;//turn left 
 		  	else return false ;
-        }
+        }*/
 
 }
 //Obstacle avoidance algorithm.
