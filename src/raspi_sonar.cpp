@@ -217,6 +217,8 @@ bool my_caculate_direction()
 //Obstacle avoidance algorithm.
 void obstacleAvoidance()
 {
+
+#if 0
   switch (_navState) {
     case CHECK_ALL: { //if no obstacle, go forward at maximum speed
         if (isObstacleLeft == 0 && isObstacleCenter == 0 && isObstacleRight == 0) {
@@ -303,6 +305,9 @@ void obstacleAvoidance()
       } 
 		break;
   }
+
+	#endif
+	
 }
 
 

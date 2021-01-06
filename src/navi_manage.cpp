@@ -914,9 +914,8 @@ void *navimanage_handle (void *arg)
 						DEBUG(LOG_ERR,"distance > 200m \n");
 						 break;
 					}	
-					 //MoveDistanceDwa(waypointRange);
+					 MoveDistanceDwa(waypointRange);
 					 
-					 MoveDistance(waypointRange);
 	                 SteerToHeading();//行驶中依然根据航向脚纠偏算法I
 
 	                 break;    
