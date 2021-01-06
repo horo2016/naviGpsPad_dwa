@@ -33,6 +33,8 @@
 
 #include<sched.h>
 #include "dwa_demo.h"
+#include "raspi_sonar.h"
+
 
 #define MAX_SPEED 150
 #define NORMAL_SPEED 30
@@ -636,7 +638,7 @@ int HeadingAnalysis(int Heading,int Bearing)
      while ((!done)&&(GLOBAL_STATUS == MOVE_STATUS));
     cmd_send2(0.0,0.0);
 	
-     threadActive = 0;
+      
 	    DEBUG(LOG_DEBUG,"move distance  thread exit \n");
       pthread_exit(NULL);
      return 0;
