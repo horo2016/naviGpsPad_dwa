@@ -4,7 +4,7 @@
  * Released under MIT License - see LICENSE file for details.
  */
 
-#include "Arduino.h"
+
 #include "SimpleKalmanFilter.h"
 #include <math.h>
 
