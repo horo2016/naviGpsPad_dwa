@@ -176,7 +176,7 @@ float echo_callback( uint32_t id)
 //	DEBUG(LOG_DEBUG, "stop-start:%d \n",(stop-start));//34cm/ms
 	if((stop - start) >= 38000)
 	      return 5.0;
-//	DEBUG(LOG_DEBUG, "distance:%d \n",(stop - start)  * 34 / 2000);
+//	DEBUG(LOG_DEBUG, "distance:%d cm\n",(stop - start)  * 34 / 2000);
 	dis = (stop - start)  * 34 / 2000;// 
 	 
 	return  (float)dis;
@@ -315,9 +315,9 @@ void obstacleAvoidance()
 
  //Apply Kalman Filter to sensor reading.
  void applyKF() {
-   isObstacleLeft = obstacleDetection(KF_Left.updateEstimate(raspi_sonars[2].distance));
-   isObstacleCenter = obstacleDetection(KF_Center.updateEstimate(raspi_sonars[1].distance));
-   isObstacleRight = obstacleDetection(KF_Right.updateEstimate(raspi_sonars[0].distance));
+   isObstacleLeft = obstacleDetection((raspi_sonars[2].distance));
+   isObstacleCenter = obstacleDetection((raspi_sonars[1].distance));
+   isObstacleRight = obstacleDetection((raspi_sonars[0].distance));
  }
  int main_sonar()
  {
@@ -348,7 +348,14 @@ void obstacleAvoidance()
 	 while (1) {
 		 for (auto& sonar: sonars) {
 			 sonar_trigger(sonar.id);
-				 raspi_sonars[sonar.id].distance = echo_callback(sonar.id);
+				 if(sonar.id == 0)
+				   raspi_sonars[sonar.id].distance =  KF_Right.updateEstimate(echo_callback(sonar.id))  ;
+				 else if(sonar.id == 1)
+					 raspi_sonars[sonar.id].distance =	KF_Center.updateEstimate(echo_callback(sonar.id))  ;
+				 else if(sonar.id == 2)
+					 raspi_sonars[sonar.id].distance =	KF_Left.updateEstimate(echo_callback(sonar.id))  ;
+									  
+
 				 applyKF();
 			 usleep(100000);
 		 }
