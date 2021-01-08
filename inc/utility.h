@@ -10,6 +10,9 @@
 
 #define PI 3.141592653
 
+#define CENTER_FACE_SONAR  1
+#define LEFT_FACE_SONAR    2
+#define RIGHT_FACE_SONAR   0
 
 
 struct State {
