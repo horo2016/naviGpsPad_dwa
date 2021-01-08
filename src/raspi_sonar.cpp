@@ -49,7 +49,7 @@ bool isObstacleRight;
 
 
 uint8_t MIN_RANGE_OBSTACLE = 5; //Between 0 and 5 cm is the blind zone of the sensor.
-uint8_t MAX_RANGE_OBSTACLE = 75; //The maximum range to check if obstacle exists.
+uint8_t MAX_RANGE_OBSTACLE = 55; //The maximum range to check if obstacle exists.
  
 
 SimpleKalmanFilter KF_Left(2, 2, 0.01);

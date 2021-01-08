@@ -11,6 +11,7 @@ public:
     Dwa(const State& start, const Point& goal,  const Obstacle& obs, const Config& config);
 
     bool stepOnceToGoal(std::vector<State>* best_trajectry, State* cur_state,Obstacle *cur_obs);
+	int update_obstacle(sonar_dis *sonars);
     State motion(State x, Control u, float dt);
     Point goal_;
     Obstacle obs_;

@@ -9,10 +9,56 @@
 #include<array>
 #include<cmath>
 #include <limits>
+#include "raspi_sonar.h"
 
 Dwa::Dwa(const State& start, const Point& goal,  const Obstacle& obs, const Config& config):
 cur_x_(start), goal_(goal), obs_(obs), config_(config)
 {
+
+}
+int Dwa::update_obstacle(sonar_dis *sonars)
+{
+    
+     DEBUG(LOG_DEBUG,"SONAERS CENTER:%.1f \n",sonars[CENTER_FACE_SONAR].distance/100);
+	 DEBUG(LOG_DEBUG,"SONAERS LEFT:%.1f \n",sonars[LEFT_FACE_SONAR].distance/100);
+	 DEBUG(LOG_DEBUG,"SONAERS RIGHT:%.1f \n",sonars[RIGHT_FACE_SONAR].distance/100);
+     if( (sonars[CENTER_FACE_SONAR].distance <= MAX_RANGE_OBSTACLE) && (sonars[CENTER_FACE_SONAR].distance  > MIN_RANGE_OBSTACLE))
+    {
+      DEBUG(LOG_DEBUG,"dwa_demo.cur_%.1f %.1f \n", cur_x_.x_,cur_x_.y_);
+	  obs_.clear();
+      float disfat =  sonars[CENTER_FACE_SONAR].distance ;
+      if((disfat >= MAX_RANGE_OBSTACLE/2))
+      {
+        Point ob{cur_x_.x_+ disfat * std::cos(cur_x_.theta_),cur_x_.y_+ disfat* std::sin(cur_x_.theta_)};
+	    obs_.push_back(ob);
+   
+      //theta *3.1415/180;
+     // car left id =2 
+        disfat =  sonars[LEFT_FACE_SONAR].distance ;
+        if(disfat  <= MAX_RANGE_OBSTACLE/3){
+	     Point ob{cur_x_.x_+ disfat * std::cos(cur_x_.theta_ + 45*3.1415/180),cur_x_.y_+ disfat* std::sin(cur_x_.theta_+45*3.1415/180)};
+	     obs_.push_back(ob);
+	    }
+	      //car right id =0
+	     disfat =  sonars[RIGHT_FACE_SONAR].distance ;
+	     if(disfat  <= MAX_RANGE_OBSTACLE/3){
+		 Point ob{cur_x_.x_+ disfat * std::cos(cur_x_.theta_ - 45*3.1415/180),cur_x_.y_+ disfat* std::sin(cur_x_.theta_-45*3.1415/180)};
+	     obs_.push_back(ob);
+	    }
+        cur_x_.v_ =0.05;
+      }
+     else if(disfat < MAX_RANGE_OBSTACLE/2)
+      {
+        cmd_send2(0.0,0.0);
+        do{
+            cmd_send2(-0.3,0.0);
+            usleep(300000);
+		    disfat =  sonars[CENTER_FACE_SONAR].distance ;
+          }while(disfat <= MAX_RANGE_OBSTACLE/2);
+      }
+     
+    }
+   
 
 }
 
