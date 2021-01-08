@@ -13,6 +13,7 @@ public:
     bool stepOnceToGoal(std::vector<State>* best_trajectry, State* cur_state,Obstacle *cur_obs);
 	int update_obstacle(sonar_dis *sonars);
     State motion(State x, Control u, float dt);
+	int  state_error_check();
     Point goal_;
     Obstacle obs_;
     Config config_;
@@ -25,6 +26,9 @@ private:
     Traj calc_trajectory(State x, float v, float w, Config config);
     float calc_obstacle_cost(Traj traj, Obstacle ob, Config config);
     float calc_to_goal_cost(Traj traj, Point goal, Config config);
+	
+	float calc_to_goalDist_cost(Traj traj, Point goal, Config config);
+	
     Traj calc_final_input(
             State x, Control& u,
             Window dw, Config config, Point goal,

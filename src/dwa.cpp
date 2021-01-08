@@ -16,6 +16,15 @@ cur_x_(start), goal_(goal), obs_(obs), config_(config)
 {
 
 }
+
+
+int Dwa::state_error_check()
+{
+   static float start_theta = cur_x_.theta_ ;
+   if(cur_x_.theta_ - start_theta >= 2*PI)
+      return -1;
+}
+
 int Dwa::update_obstacle(sonar_dis *sonars)
 {
     
@@ -97,8 +106,8 @@ Window Dwa::calc_dynamic_window(State x, Config config){
     return {
             std::max((x.v_ - config.max_accel * config.dt), config.min_speed),
             std::min((x.v_ + config.max_accel * config.dt), config.max_speed),
-            std::max((x.w_ - config.max_dyawrate * config.dt), config.min_yawrate),
-            std::min((x.w_ + config.max_dyawrate * config.dt), config.max_yawrate)+0.1
+            -0.2,//std::max((x.w_ - config.max_dyawrate * config.dt), config.min_yawrate),
+            0.2 //std::min((x.w_ + config.max_dyawrate * config.dt), config.max_yawrate)+0.1
     };
 
 //    return {
@@ -163,6 +172,38 @@ float Dwa::calc_to_goal_cost(Traj traj, Point goal, Config config){
 
     return cost;
 };
+//计算到路径末尾到目标点的距离 距离越小越优先
+float Dwa::calc_to_goalDist_cost(Traj traj, Point goal, Config config){
+
+	 
+	 int skip_n = 2;
+	 float minr = 1;
+	 float cost = 100;
+	 char cnt =0;
+	 float base_dis = std::sqrt(std::pow(traj[0].x_ - goal.x_,2)  + std::pow(traj[0].y_ - goal.y_,2));
+	 for (unsigned int ii=0; ii<traj.size(); ii+=skip_n){
+		
+			 float ox = goal.x_;
+			 float oy = goal.y_;
+			 float dx = traj[ii].x_ - ox;
+			 float dy = traj[ii].y_ - oy;
+	
+			 float r = std::sqrt(dx*dx + dy*dy);
+			 if(r > base_dis)
+			 {
+				base_dis = r;
+				cnt ++;
+				if(cnt >2)
+					return 10;//此路不通
+			 }
+			 cost = r/(r+1);
+			 if (cost <= minr){ 
+                 minr = cost;
+             }
+	
+	}
+   return    cost;
+};
 
 Traj Dwa::calc_final_input(
         State x, Control& u,
@@ -188,10 +229,11 @@ Traj Dwa::calc_final_input(
             float to_goal_cost = calc_to_goal_cost(traj, goal, config);
             float speed_cost = config.speed_cost_gain * (config.max_speed - traj.back().v_);
             float ob_cost = calc_obstacle_cost(traj, ob, config);
+			float dis_cost = calc_to_goalDist_cost(traj, goal, config);
 			// by lide 增加比重
 		    // 航向得分的比重、速度得分的比重、障碍物距离得分的比重 
             //evalParam = [];
-            float final_cost = 1.5*to_goal_cost + 2.5*speed_cost + ob_cost;
+            float final_cost =  to_goal_cost +  speed_cost + ob_cost + dis_cost;
             //计算总的损耗  损耗越小path better
             if (final_cost  <= min_cost){
                 min_cost = final_cost;

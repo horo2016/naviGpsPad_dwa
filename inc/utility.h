@@ -60,11 +60,11 @@ struct Config{
     float dt = 0.5;
     float predict_time = 5.0;
     //障碍物最小距离
-    float obstacle_min_dis = 0.2;
+    float obstacle_min_dis = 0.1;
     //距离目标最小距离
     float goal_min_dis = 1.0;
     float robot_radius = 0.6;//1 bylide 实际中注意这个机器人的半径 太大导致原地打转
-    float to_goal_cost_gain = 0.5;//1.0 权重调节 认为航向角的比重为0.5
+    float to_goal_cost_gain = 1.0;// 权重调节 认为航向角的比重为
     float speed_cost_gain = 1.0;
 };
 

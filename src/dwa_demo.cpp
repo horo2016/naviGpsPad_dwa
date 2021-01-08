@@ -93,6 +93,11 @@ int dwa_loop(float meters){
         dwa_demo.cur_x_ = dwa_demo.motion(dwa_demo.cur_x_, dwa_demo.feed_u, config.dt);
    //avoidance check		
         dwa_demo.update_obstacle(raspi_sonars);
+   //error check
+        if(dwa_demo.state_error_check() == -1){
+			printf("error cannot navigation \n");
+			break;
+        	}
    // visualization
         cv::Mat bg(200,200, CV_8UC3, cv::Scalar(255,255,255));
         cv::circle(bg, cv_offset(goal.x_, goal.y_, bg.cols, bg.rows),
