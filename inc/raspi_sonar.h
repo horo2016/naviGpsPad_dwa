@@ -4,6 +4,7 @@
 extern "C" {
 #endif
 
+#include "stdint.h"
 typedef  struct{
 	float distance;
 	
@@ -16,8 +17,8 @@ extern  void *getUltrasonicThread(void *arg);
 extern void obstacleAvoidance();
 
 
-uint8_t MIN_RANGE_OBSTACLE ; //Between 0 and 5 cm is the blind zone of the sensor.
-uint8_t MAX_RANGE_OBSTACLE ;
+extern uint8_t MIN_RANGE_OBSTACLE ; //Between 0 and 5 cm is the blind zone of the sensor.
+extern uint8_t MAX_RANGE_OBSTACLE ;
 
 #ifdef __cplusplus
 }

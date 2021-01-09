@@ -9,8 +9,10 @@
 #include<array>
 #include<cmath>
 #include <limits>
+#include <unistd.h>
 #include "raspi_sonar.h"
-
+#include "osp_syslog.h"
+#include "stm32_control.h"
 Dwa::Dwa(const State& start, const Point& goal,  const Obstacle& obs, const Config& config):
 cur_x_(start), goal_(goal), obs_(obs), config_(config)
 {

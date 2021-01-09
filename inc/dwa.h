@@ -5,6 +5,8 @@
 #ifndef DWA_DEMO_DWA_H
 #define DWA_DEMO_DWA_H
 #include "utility.h"
+#include "raspi_sonar.h"
+
 
 class Dwa {
 public:
