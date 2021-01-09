@@ -107,11 +107,11 @@ void *IMUThread(void *)
 
     //  now just process data
 
-    long impactTimer = millis();
+    long impactTimer = getmillis();
     double prevGx = 0;
     double prevGy = 0;
     double prevGz = 0;
-    long lastMillis = millis();
+    long lastMillis = getmillis();
     while (1)
     {
 	//  poll at the rate recommended by the IMU
@@ -169,8 +169,8 @@ void *IMUThread(void *)
 ////		rollAngle = rollFilter.GetValue();
 ////		pitchAngle = pitchFilter.GetValue();
 
-		gyroDeltaT = millis() - lastMillis;
-		lastMillis = millis();
+		gyroDeltaT = getmillis() - lastMillis;
+		lastMillis = getmillis();
 	    }
 
 	    //  update rate every second

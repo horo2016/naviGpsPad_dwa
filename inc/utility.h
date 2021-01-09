@@ -60,7 +60,7 @@ struct Config{
     float dt = 0.5;
     float predict_time = 5.0;
     //障碍物最小距离
-    float obstacle_min_dis = 0.1;
+    float obstacle_min_dis = 0.05;
     //距离目标最小距离
     float goal_min_dis = 1.0;
     float robot_radius = 0.6;//1 bylide 实际中注意这个机器人的半径 太大导致原地打转
