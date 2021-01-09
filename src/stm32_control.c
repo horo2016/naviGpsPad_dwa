@@ -304,9 +304,11 @@ int *stm_Loop()
 				 printf("car inform px.cvalue:%.3f \n",posx.fvalue);
 				 printf("car inform py.cvalue:%.3f \n",posy.fvalue);
 			*/
+			if((vx.fvalue < 1.0)&&(vx.fvalue > -0.1)&&(va.fvalue > -0.5 )&&(va.fvalue < 0.5)){
 				 velspeed = (vx.fvalue);
 				 angspeed = (va.fvalue);
 				 positionx = posx.fvalue *10;
+				}
 			   }
 			
 		    // printf("imu serial read byte length:%d\n",i_nread);//32 bytes

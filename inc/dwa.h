@@ -15,7 +15,8 @@ public:
     bool stepOnceToGoal(std::vector<State>* best_trajectry, State* cur_state,Obstacle *cur_obs);
 	int update_obstacle(sonar_dis *sonars);
     State motion(State x, Control u, float dt);
-	int  state_error_check();
+	State motion_calculate(State x, float heading_d,Control u, float dt);
+	int  state_error_check(float head_d);
     Point goal_;
     Obstacle obs_;
     Config config_;

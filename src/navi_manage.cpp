@@ -36,8 +36,7 @@
 #include "raspi_sonar.h"
 
 
-#define MAX_SPEED 150
-#define NORMAL_SPEED 30
+
 
 
 char  GLOBAL_STATUS =0;
@@ -133,7 +132,7 @@ void ReadWaypointsFile()
 // as 'if (lastMillis - millis() > 1000)'.  Just watch out for the wrapping issue, which will happen every 4,294,967,295
 // milliseconds - unless you account for this, I don't recommend using this function for anything that will cause death or
 // disembowelment when it suddenly wraps around to zero (e.g. avionics control on an aircraft)...
-unsigned long millis()
+unsigned long getmillis()
 {
     struct timeval tv;
     gettimeofday(&tv, 0);
@@ -175,8 +174,8 @@ unsigned long millis()
  
      // Set up the PID controllers for heading and wall following
      headingPIDInput = 0;
-     headingPID.SetOutputLimits(-NORMAL_SPEED, NORMAL_SPEED);
-     headingPID.SetMode(AUTOMATIC);
+   //  headingPID.SetOutputLimits(-NORMAL_SPEED, NORMAL_SPEED);
+   //  headingPID.SetMode(AUTOMATIC);
  
   
  }
@@ -623,7 +622,7 @@ int HeadingAnalysis(int Heading,int Bearing)
 
      // Backup method - use the magnetometer to see what direction we're facing.  Stop turning when we reach the target heading.
      int currentPosition = (int)positionx;
-     DEBUG(LOG_DEBUG,"MOve: currentPosition = %d   targetPosition = %d\n", currentPosition, targetPosition);
+    // DEBUG(LOG_DEBUG,"MOve: currentPosition = %d   targetPosition = %d\n", currentPosition, targetPosition);
      if ((currentPosition <= targetPosition) && (meters < 0) && (startPosition > targetPosition))
      {
          done = 1;
@@ -859,7 +858,7 @@ void *navimanage_handle (void *arg)
     char onceread =0;
     while (1)
     {
-    	unsigned long loopTime = millis();
+    	unsigned long loopTime = getmillis();
 		while(GLOBAL_SWITCH)
 		{   
 	  	    if(onceread ==0)
@@ -882,7 +881,7 @@ void *navimanage_handle (void *arg)
 	                break;
 
 		    }
-	            if ((millis() - lastSubMillis > SUBSUMPTION_INTERVAL))
+	            if ((getmillis() - lastSubMillis > SUBSUMPTION_INTERVAL))
 	           {
 	              switch(GLOBAL_STATUS)
 	              {
@@ -956,18 +955,18 @@ void *navimanage_handle (void *arg)
 	                 }
 
 	     
-	          	lastSubMillis = millis();
+	          	lastSubMillis = getmillis();
 	            }//end  sub loop
 	      
-	          	if ( millis() - lastGPSMillis > CALCULATE_GPS_HEADING_INTERVAL)
+	          	if ( getmillis() - lastGPSMillis > CALCULATE_GPS_HEADING_INTERVAL)
 	        	{
 	        	 		if(GLOBAL_STATUS == MOVE_STATUS)
 						SteerToHeadingOfGPS();
 	            		CalculateHeadingToWaypoint();
 		        	    CalculateDistanceToWaypoint();
-	            		lastGPSMillis = millis(); //
+	            		lastGPSMillis = getmillis(); //
 	            }
-				if ( millis() - lastDISMillis > DIS_BLINK_INTERVAL)
+				if ( getmillis() - lastDISMillis > DIS_BLINK_INTERVAL)
 	        	{
 	        	 		/*if(GLOBAL_STATUS == MOVE_STATUS)
 	        	 		{
@@ -980,7 +979,7 @@ void *navimanage_handle (void *arg)
 
 							}*/
 							
-	            		lastDISMillis = millis(); //lastDISMillis
+	            		lastDISMillis = getmillis(); //lastDISMillis
 	            }
 	     	}//end while switch on
      	if(GLOBAL_STATUS == MANUAL_STATUS )
@@ -1005,7 +1004,7 @@ void *navimanage_handle (void *arg)
         		}
     	    }
     	}
-        unsigned long now = millis();
+        unsigned long now = getmillis();
     	if (now - loopTime < 1)
             usleep((1 - (now - loopTime)) * 1000);
     }//end while1

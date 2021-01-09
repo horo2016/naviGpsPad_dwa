@@ -13,6 +13,9 @@
 #include "stm32_control.h"
 #include "check_dis_module.h"
 #include "raspi_sonar.h"
+#include "navi_manage.h"
+#include "imu.h"
+
 //20m*20m 200dm*200dm
 cv::Point2i cv_offset(    float x, float y, int image_width=200, int image_height=200)
 {
@@ -67,7 +70,7 @@ int dwa_loop(float meters){
     {
         return 0;
     }
-    while(!dwa_demo.stepOnceToGoal(&ltraj, &x,&dyn_ob)){
+    while(!dwa_demo.stepOnceToGoal(&ltraj, &x,&dyn_ob)&&(GLOBAL_STATUS != STOP_STATUS)){
         traj.push_back(x);
          // action to wheel 
 	 if(once == 0)
@@ -90,14 +93,16 @@ int dwa_loop(float meters){
         dwa_demo.feed_u.v_ =  velspeed;
         dwa_demo.feed_u.w_ =  angspeed;
         DEBUG(LOG_DEBUG,"2 car receive info v=%.1f,w=%.1f\n", dwa_demo.feed_u.v_, dwa_demo.feed_u.w_);
-        dwa_demo.cur_x_ = dwa_demo.motion(dwa_demo.cur_x_, dwa_demo.feed_u, config.dt);
-   //avoidance check		
-        dwa_demo.update_obstacle(raspi_sonars);
+        dwa_demo.cur_x_ = dwa_demo.motion_calculate(dwa_demo.cur_x_, heading,dwa_demo.feed_u, config.dt);
+
+		//avoidance check		
+        if(dwa_demo.update_obstacle(raspi_sonars) == 0)
+			break;
    //error check
-        if(dwa_demo.state_error_check() == -1){
+        if(dwa_demo.state_error_check(heading) == -1){
 			printf("error cannot navigation \n");
 			break;
-        	}
+        }
    // visualization
         cv::Mat bg(200,200, CV_8UC3, cv::Scalar(255,255,255));
         cv::circle(bg, cv_offset(goal.x_, goal.y_, bg.cols, bg.rows),

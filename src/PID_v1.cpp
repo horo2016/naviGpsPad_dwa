@@ -33,7 +33,7 @@ PID::PID(double* Input, double* Output, double* Setpoint,
     PID::SetControllerDirection(ControllerDirection);
     PID::SetTunings(Kp, Ki, Kd);
 
-    lastTime = millis()-SampleTime;				
+    lastTime = getmillis()-SampleTime;				
 }
  
  
@@ -46,7 +46,7 @@ PID::PID(double* Input, double* Output, double* Setpoint,
 bool PID::Compute()
 {
    if(!inAuto) return false;
-   unsigned long now = millis();
+   unsigned long now = getmillis();
    unsigned long timeChange = (now - lastTime);
    if(timeChange>=SampleTime)
    {

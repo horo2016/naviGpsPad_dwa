@@ -20,40 +20,61 @@ cur_x_(start), goal_(goal), obs_(obs), config_(config)
 }
 
 
-int Dwa::state_error_check()
+int Dwa::state_error_check(float head_d)
 {
    static float start_theta = cur_x_.theta_ ;
-   if(cur_x_.theta_ - start_theta >= 2*PI)
+   static float start_heading = head_d ;
+   
+   if(cur_x_.theta_ - start_theta >= 2*PI){
+
+	  DEBUG(LOG_ERR,"start_theta:%.2f,cur_x_.theta_:%.2f \n",start_theta, cur_x_.theta_);
+	  start_theta = 0;
+
       return -1;
+   	}
+   DEBUG(LOG_WARN,"start_heading:%.2f,cur_x_.head_d:%.2f \n",start_heading, head_d);
+     
+     if(head_d - start_heading >= 360){
+		 start_heading =0;
+
+	   return -1;
+   	}
 }
 
 int Dwa::update_obstacle(sonar_dis *sonars)
 {
+
+     static char clear_object =0;
     
-     DEBUG(LOG_DEBUG,"SONAERS CENTER:%.1f \n",sonars[CENTER_FACE_SONAR].distance/100);
+     DEBUG(LOG_DEBUG,"SONAERS CENTER:%.2f \n",sonars[CENTER_FACE_SONAR].distance/100);
 	 DEBUG(LOG_DEBUG,"SONAERS LEFT:%.1f \n",sonars[LEFT_FACE_SONAR].distance/100);
 	 DEBUG(LOG_DEBUG,"SONAERS RIGHT:%.1f \n",sonars[RIGHT_FACE_SONAR].distance/100);
      if( (sonars[CENTER_FACE_SONAR].distance <= MAX_RANGE_OBSTACLE) && (sonars[CENTER_FACE_SONAR].distance  > MIN_RANGE_OBSTACLE))
     {
       DEBUG(LOG_DEBUG,"dwa_demo.cur_%.1f %.1f \n", cur_x_.x_,cur_x_.y_);
-	  obs_.clear();
+	  
       float disfat =  sonars[CENTER_FACE_SONAR].distance ;
       if((disfat >= MAX_RANGE_OBSTACLE/2))
       {
-        Point ob{cur_x_.x_+ disfat * std::cos(cur_x_.theta_),cur_x_.y_+ disfat* std::sin(cur_x_.theta_)};
+        obs_.clear();
+        float disfat_cm =  disfat/100;
+        Point ob{cur_x_.x_+ disfat_cm * std::cos(cur_x_.theta_),cur_x_.y_+ disfat_cm* std::sin(cur_x_.theta_)};
 	    obs_.push_back(ob);
-   
+   		DEBUG(LOG_ERR,"add object front face \n");
+		clear_object =1;
       //theta *3.1415/180;
      // car left id =2 
         disfat =  sonars[LEFT_FACE_SONAR].distance ;
-        if(disfat  <= MAX_RANGE_OBSTACLE/3){
-	     Point ob{cur_x_.x_+ disfat * std::cos(cur_x_.theta_ + 45*3.1415/180),cur_x_.y_+ disfat* std::sin(cur_x_.theta_+45*3.1415/180)};
+        if(disfat  <= MAX_RANGE_OBSTACLE-15){
+		 float disfat_cm =  disfat/100;
+	     Point ob{cur_x_.x_+ disfat_cm * std::cos(cur_x_.theta_ + 45*3.1415/180),cur_x_.y_+ disfat_cm* std::sin(cur_x_.theta_+45*3.1415/180)};
 	     obs_.push_back(ob);
 	    }
 	      //car right id =0
 	     disfat =  sonars[RIGHT_FACE_SONAR].distance ;
-	     if(disfat  <= MAX_RANGE_OBSTACLE/3){
-		 Point ob{cur_x_.x_+ disfat * std::cos(cur_x_.theta_ - 45*3.1415/180),cur_x_.y_+ disfat* std::sin(cur_x_.theta_-45*3.1415/180)};
+	     if(disfat  <= MAX_RANGE_OBSTACLE-15){
+		  float disfat_cm =  disfat/100;
+		 Point ob{cur_x_.x_+ disfat_cm * std::cos(cur_x_.theta_ - 45*3.1415/180),cur_x_.y_+ disfat_cm* std::sin(cur_x_.theta_-45*3.1415/180)};
 	     obs_.push_back(ob);
 	    }
         cur_x_.v_ =0.05;
@@ -69,7 +90,13 @@ int Dwa::update_obstacle(sonar_dis *sonars)
       }
      
     }
-   
+   else if(clear_object ==1)
+   	{
+       clear_object = 0;
+	   cur_x_.v_ = 0.1;
+	   cur_x_.w_ = 0.0;
+	   return 0;
+   }
 
 }
 
@@ -96,6 +123,17 @@ bool Dwa::stepOnceToGoal(std::vector<State>* best_trajectry, State* cur_state,Ob
 
 State Dwa::motion(State x, Control u, float dt){
     x.theta_ += u.w_ * dt;
+    x.x_ += u.v_ * std::cos(x.theta_) * dt;
+    x.y_ += u.v_ * std::sin(x.theta_) * dt;
+    x.v_ = u.v_;
+    x.w_ = u.w_;
+    return x;
+};
+State Dwa::motion_calculate(State x, float heading_d,Control u, float dt){
+	static float start_head = heading_d;
+	if(u.w_ > 0)
+    x.theta_ += abs(heading_d - start_head)*PI/180;
+	else x.theta_ += -abs(heading_d - start_head)*PI/180;
     x.x_ += u.v_ * std::cos(x.theta_) * dt;
     x.y_ += u.v_ * std::sin(x.theta_) * dt;
     x.v_ = u.v_;

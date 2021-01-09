@@ -22,7 +22,7 @@ extern char  GLOBAL_SWITCH;
 
 
 
-#define MAX_SPEED    0.5
+#define MAX_SPEED     0.5
 #define SPEED_RESO    0.05
 
 extern char  GLOBAL_STATUS ;
@@ -38,7 +38,7 @@ extern double targetHeading;
 extern double waypointRange ;
 
 
-extern unsigned long millis();
+extern  unsigned long getmillis();
 extern   void RotateDegrees(int degrees);
 extern    void RotateDegreesByManual(int degrees);
 extern   void MoveDistance(int meters);
