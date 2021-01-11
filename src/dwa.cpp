@@ -275,7 +275,7 @@ Traj Dwa::calc_final_input(
             //evalParam = [];
             float final_cost =  to_goal_cost +  speed_cost + ob_cost + dis_cost;
             //计算总的损耗  损耗越小path better
-            if (final_cost  <= min_cost){
+            if (final_cost  < min_cost){
                 min_cost = final_cost;
                 min_u = Control{v, w};
                 best_traj = traj;
