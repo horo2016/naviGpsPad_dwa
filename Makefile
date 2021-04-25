@@ -28,12 +28,12 @@ CXXFILES =	$(foreach dir, $(CXXDIRS),$(wildcard $(dir)/*.cpp))
 CXXFLAGS  += -I./inc  
 CXXFLAGS  += -I$(RTIMULIBPATH)/IMUDrivers
 CFLAGS += -D__unused="__attribute__((__unused__))"
-CXXFLAGS += -I./usr/include/opencv
-CXXFLAGS += -I./usr/inc/opencv/opencv2
-CXXFLAGS += -I./usr/include 
+CXXFLAGS += -I/usr/local/include/opencv
+CXXFLAGS += -I/usr/inc/opencv/opencv2
+CXXFLAGS += -I/usr/local/include 
 #LDFLAGS += -L./usr/lib/gpac
 LDFLAGS += -ldl
-LDFLAGS += -L./usr/lib/
+LDFLAGS += -L/usr/local/lib/
 
 LDFLAGS += -lopencv_core -ldl -lm  -lstdc++
 
@@ -60,7 +60,7 @@ C_SRC+=src/Uart_comm.c
 C_SRC+=src/gps_hal.c 
 C_SRC+=src/cJSON.c
 C_SRC+= src/check_dis_module.c
-
+C_SRC+= src/config_conf.c
 CXX_SRC=
 CXX_SRC +=src/kalman.cpp
 CXX_SRC += src/dwa_demo.cpp
