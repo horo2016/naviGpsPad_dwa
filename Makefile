@@ -10,9 +10,10 @@ RTIMULIBPATH  = ./RTIMULib
 CFLAGS  += -g -pthread -Wall 
 CFLAGS  += -rdynamic -funwind-tables
 
-CFLAGS = -O2 -I./include -I./include/Mqtt
+CFLAGS = -O2 
 INCPATH   += -I. -I$(RTIMULIBPATH)
-CFLAGS  += -I./inc    
+CFLAGS  += -I./inc    -I$(RTIMULIBPATH)
+CFLAGS  += -I./Mqtt 
 DIR_LIB = lib
 DIR_LIBMQTT = Mqtt
 
@@ -33,8 +34,8 @@ CXXFLAGS += -I/usr/inc/opencv/opencv2
 CXXFLAGS += -I/usr/local/include 
 #LDFLAGS += -L./usr/lib/gpac
 LDFLAGS += -ldl
-LDFLAGS += -L/usr/local/lib/
-
+LDFLAGS += -L/usr/local/lib/  -L./usr/lib/
+LDFLAGS +=  -L./Mqtt/lib -lmosquitto
 LDFLAGS += -lopencv_core -ldl -lm  -lstdc++
 
 LDFLAGS += -lwiringPi

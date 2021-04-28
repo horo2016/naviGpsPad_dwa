@@ -100,7 +100,7 @@ int dwa_loop(float meters){
 			break;
    //error check
         if(dwa_demo.state_error_check(heading) == -1){
-			printf("error cannot navigation \n");
+			DEBUG(LOG_ERR,"error cannot navigation \n");
 			break;
         }
    // visualization

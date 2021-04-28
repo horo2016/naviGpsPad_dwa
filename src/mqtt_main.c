@@ -8,13 +8,17 @@
 #include <time.h> 
 #include <sys/time.h> 
 
-#include "Mqtt_Client.h"
 #include "cJSON.h"
 #include<pthread.h>
 #include "imu.h"
 #include "cpu_sys.h"
 #include "stm32_control.h"
 #include "navi_manage.h"
+#include "config_conf.h"
+
+#include "client_pub_sub.h"
+#include "cpu_sys.h"
+
 // int mysock = 0;
 
 #define TURNROUND "turnround"
@@ -25,22 +29,12 @@
 
 int toStop = 0;
 
-MQTT_USER_MSG  User_MqttMsg;
 
-static void User_MsgCtl(MQTT_USER_MSG  *msg);
+
+
 static int GetNextPackID(void);
 
-MQTT_ClientStruct user_Client = 
-{
-	.sock = -1,
-	.Status = DisConnect,
-	.length = MQTT_BUFFERLENTH,
-	.open = transport_open,
-	.getdata = transport_getdata,
-	.sendPacket = transport_sendPacketBuffer,
-	.MsgCtl = User_MsgCtl,
-	.GetNextPackID = GetNextPackID,
-};
+
  char  send_buf[0xff]={0};
 int Creatstatejson(float head,float roll,float pitch)
 {
@@ -138,7 +132,7 @@ void stop_init(void)
 	signal(SIGINT, cfinish);
 	signal(SIGTERM, cfinish);
 }
-
+#if 0
 void User_MsgCtl(MQTT_USER_MSG  *msg)
 {
 	char tmp_value[36];
@@ -160,7 +154,7 @@ void User_MsgCtl(MQTT_USER_MSG  *msg)
 	printf("MQTT>>msg topic %s\r\n",msg->topic);	
 	printf("MQTT>>msg: %s\r\n",msg->msg);	
 	printf("MQTT>>msg length: %d\r\n",msg->msglenth);	 
-	
+#ifdef _LOCAL_SERVER	
       if( get_value_from_cmdline((char *)msg->msg,RUNFORWARD,tmp_value )==0){
             printf("runforward %d \n",atoi(tmp_value));
 			GLOBAL_STATUS = MOVE_STATUS;
@@ -185,12 +179,15 @@ void User_MsgCtl(MQTT_USER_MSG  *msg)
            GLOBAL_STATUS = STOP_STATUS;
            GLOBAL_SWITCH = 0;
         }
-	
+#else 
+
+
+#endif
 	// 处理后销毁数据
 	
 	msg->valid  = 0;
 }
-
+#endif
 static int GetNextPackID(void)
 {
 	 static unsigned int pubpacketid = 0;
@@ -199,95 +196,15 @@ static int GetNextPackID(void)
 
 void *Mqtt_ClentTask(void *argv)
 {
-	MQTTPacket_connectData connectData= MQTTPacket_connectData_initializer;
-
-	int rc = 0, type;
-	int PublishTime = 0;
-	int heartbeatTime = 0;
-
-    struct timeval    sys_tv, tv;
-    struct timezone		tz; 
-	fd_set readfd;
-
-	tv.tv_sec = 5;
-	tv.tv_usec = 0;
-
-	connectData.willFlag = 0;
-	// 创建 MQTT 客户端连接参数
-	connectData.MQTTVersion = 4;
-	// MQTT 版本
-	connectData.clientID.cstring = ClientID;
-	// 客户端ID
-	connectData.keepAliveInterval = KEEPLIVE_TIME;
-	// 保活间隔
-	connectData.username.cstring = UserName;
-	// 用户名
-	connectData.password.cstring = UserPassword;
-	// 用户密码
-	connectData.cleansession = 1;
-
-	user_Client.Status = DisConnect;
+	
+	sleep(2);
+    mainSub(chargename);
 	while (1)
 	{
-		user_Client.sock = user_Client.open(HOST_NAME, HOST_PORT);
-		if(user_Client.sock >= 0)
-		{
-			break;
-		}
-
+		
 		printf("ReConnect\n");
 		sleep(3);
 	}
-
-	rc = MQTTClientInit(user_Client, connectData);
-	if (rc < MqttClientSuccess)
-	{
-		printf("MQTT_reconnect %d\n", rc);
-		goto MQTT_reconnect;
-	}
-
-	rc = MQTTClientSubscribe(user_Client, SubscribeMsg, QOS0);
-	// 订阅 SubscribeMsg
-	if(rc < 0)
-		goto MQTT_reconnect;
-
-	printf("开始循环接收消息...\r\n");
-
-	user_Client.Status = Connect;
-	while (1)
-	{
-		gettimeofday(&sys_tv, &tz);
-
-		FD_ZERO(&readfd);
-		// 推送消息
-		FD_SET(user_Client.sock,&readfd);						  
-
-		select(user_Client.sock+1, &readfd, NULL, NULL, &tv);
-		// 等待可读事件
-
-		if(FD_ISSET(user_Client. sock, &readfd) != 0)
-		{
-			// 判断 MQTT 服务器是否有数据
-			type = MQTTClientReadPacketTimeout(&user_Client, 0);
-			if(type != -1)
-				MQTTClientCtl(user_Client, type);
-		} 
-
-		if ((sys_tv.tv_sec-heartbeatTime ) > 15)
-		{
-			// 发送心跳包
-			printf("tv_sec:%ld\n",sys_tv.tv_sec);
-			heartbeatTime = sys_tv.tv_sec;
-
-			if(MQTTClientSendPingReq(user_Client) < 0)
-				goto MQTT_reconnect;
-		}
-	
-	}
-MQTT_reconnect:
-	printf("MQTT_reconnect\n");
-
-	return 0;
 }
 void *Mqtt_PublishTask(void *argv)
 {
@@ -295,9 +212,16 @@ void *Mqtt_PublishTask(void *argv)
 	stop_init();
 
 	
-	// Mqtt_ClentTask(NULL);
-
+	sleep(2);
+    mainPub(chargename);
 	while (1)
+	{
+		
+		printf("ReConnect\n");
+		sleep(3);
+	}
+
+	#if 0  
 	{
 		
 
@@ -313,6 +237,7 @@ void *Mqtt_PublishTask(void *argv)
 		}
 		sleep(1);
 	}
+	#endif
 
 	return 0;
 }

@@ -15,6 +15,11 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#include "config_conf.h"
+
+
+
+char chargename[17]="1234567890123456";
 
 Kalman cpuLoadFilter(0.125, 4, 1, 0);
 
@@ -23,8 +28,62 @@ double cpuPercentage = 0.0;
 int cpuTemperature = 0;
 int wifiSignalStrength = 0;
 
+#define FILEBUFFER_LENGTH 5000
+#define EMPTY_STR " "
 
 
+//打开fileName指定的文件，从中读取第lineNumber行
+//返回值：成功返回1，失败返回0
+int get_file_line(char *fileName,int lineNumber)
+{
+    FILE *filePointer;
+    int i=0,j=0;
+    char buffer[FILEBUFFER_LENGTH];
+    char *temp;
+    char *sub_str = NULL ;
+
+    if((fileName==NULL))
+    {
+        return 0;
+    }
+
+    if(!(filePointer=fopen(fileName,"rb")))
+    {return 0;}
+
+
+    while((!feof(filePointer))&&(i<lineNumber))
+    {
+        if(!fgets(buffer,FILEBUFFER_LENGTH,filePointer))
+        {
+            return 0;
+        }
+        i++;//差点又忘记加这一句了
+    }
+
+
+
+    fgets(buffer,sizeof(buffer),filePointer); //读第bai10行
+    printf("%s", buffer );
+    sub_str = strstr(buffer, "Serial");
+
+    if(sub_str != NULL){
+        sub_str += (strlen("Serial") + 4); //
+        printf("%s\n", sub_str);
+       int value_len = get_strchr_len(sub_str, '\n');
+      
+
+         for(j=0;j<value_len;j++){
+             chargename[j]= *(sub_str+j);
+            }
+         chargename[16]='\0';
+
+
+    }
+
+
+    fclose(filePointer);
+    return 1;
+}
 
 
 /*******************************************************************************
@@ -73,6 +132,10 @@ void GetWifiSignalStrength()
 
 void *getCPUPercentageThread(void *)
 {
+
+    memset(chargename,0,16);
+    get_file_line("/proc/cpuinfo",42);
+    printf("device id name:%s\n",chargename);
     while (1)
     {
         char buffer[256];

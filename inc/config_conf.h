@@ -1,9 +1,10 @@
 #ifndef _CONFIG_CONF_H
 #define _CONFIG_CONF_H
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 
 #define	VIDEO_PICTUTE_DEFAULT_STORAGE_PATH		"/etc/tracklogpath.conf"
 #define TRACKLOG_NAME_NUMER						"/etc/tracklogname.conf"
@@ -35,6 +36,7 @@
 #define TIMEOUT_PATH							"/etc/conection.conf"
 #define TIMEOUT_KEY								"DisConnectionTime"
 
+#define SERVER_IP    "47.94.222.103" 
 extern void get_tracklog_storage_path(const char *path,char *tracklog_path);
 extern void get_tracklog_name(const char *config_path,int *name) ;
 extern int get_value_from_config_file(const char* file, char *key, char *value);
@@ -47,5 +49,12 @@ extern int get_mac(char *addr) ;
 extern int modify_wifi_conf(char *ssid,int ssid_len,char *passwd,int passwd_lenn) ;
 extern void check_wifi_conf() ;
 extern int check_hostapd_conf() ;
+extern int get_strchr_len(char *str, char c);
+
+
+
+#ifdef __cplusplus
+}
+#endif
 #endif
 

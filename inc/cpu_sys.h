@@ -10,6 +10,7 @@ extern double cpuPercentage ;
 extern int cpuTemperature ;
 extern int wifiSignalStrength ;
 
+extern char chargename[17];
 
 extern void *getCPUPercentageThread(void *);
 
