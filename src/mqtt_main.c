@@ -74,19 +74,7 @@ int Creatstatejson(float head,float roll,float pitch)
  * param[out] 	: none
  * return 		: >0-len, -1-fail
  *******************************************************************************/
-int get_strchr_len(char *str, char c)
-{
-	int i = 0;
-	int len = 0;
 
-	if(!str)
-		return -1;
-
-	while(*(str+i++) != c)
-		len ++;
-
-	return len;
-}
 /*******************************************************************************
  * function name	: get_value_from_config_file
  * description	: get value from config

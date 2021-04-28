@@ -98,7 +98,7 @@ int clientPub_config_load(struct mosq_config *cfg, int pub_or_sub,char *devid)
 #endif
 	args[0] = NULL;
 
-	init_config(cfg);
+	//init_config(cfg);
 	init_pub_config(cfg,devid);
 
 	/* Default config file */
